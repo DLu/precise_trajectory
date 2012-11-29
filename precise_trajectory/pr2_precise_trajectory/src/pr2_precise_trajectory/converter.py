@@ -1,5 +1,23 @@
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from sensor_msgs.msg import JointState
+import pickle
+import yaml
+
+def load_trajectory(filename):
+    if ".traj" in filename:
+        trajectory = pickle.load(open(filename, 'r'))
+        return trajectory_to_simple( trajectory )
+    elif '.yaml' in filename:
+        return yaml.load( open(sys.argv[1], 'r'))
+    else:
+        print "Unknown file type"
+        return None
+
+def save_trajectory(trajectory, filename):
+    f = open(filename, 'w')
+    f.write(yaml.dump(trajectory))
+    f.close()
+
 
 def simple_to_message_single(angles, duration, arm):
     movements = {arm: angles, 'time': duration}

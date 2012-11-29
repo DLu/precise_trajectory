@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_precise_trajectory')
 import rospy
-from pr2_precise_trajectory.converter import simple_to_joint_states
+from pr2_precise_trajectory.converter import simple_to_joint_states, load_trajectory
 import sys
-import yaml
 
 if __name__ == '__main__':
-    movements = yaml.load( open(sys.argv[1], 'r'))
+    movements = load_trajectory( sys.argv[1] )
     rospy.init_node('play_as_joints')
     pub = rospy.Publisher('/arm_angles', JointState)
 
