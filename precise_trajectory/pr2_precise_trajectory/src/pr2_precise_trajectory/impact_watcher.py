@@ -6,7 +6,7 @@ from actionlib import SimpleActionClient, SimpleGoalState
 from sensor_msgs.msg import JointState
 import trajectory_msgs.msg
 
-class ImpactController:
+class ImpactWatcher:
     def __init__(self, names=['r_gripper_sensor_controller'], rate=200):
         self.accel = rospy.get_param('acceleration_trigger', 6.0)
         self.slip = rospy.get_param('slip_trigger', 0.008)
