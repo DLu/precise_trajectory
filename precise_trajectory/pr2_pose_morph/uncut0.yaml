@@ -1,0 +1,15 @@
+- {t: 0.0}
+- {head_pan_joint: 0.61342799999999986, l_elbow_flex_joint: -0.60818060000000007,
+  l_shoulder_lift_joint: 0.84528870000000011, l_shoulder_pan_joint: 0.47939816339819408,
+  l_upper_arm_roll_joint: 1.5734999999999999, l_wrist_roll_joint: 1.2057600000000002,
+  r_elbow_flex_joint: -0.71496040000000005, r_shoulder_lift_joint: 0.65329870000000023,
+  r_shoulder_pan_joint: -0.59639816339831109, r_upper_arm_roll_joint: -1.6768999999999998,
+  r_wrist_roll_joint: -1.8777200000000001, t: 5.0, theta: 0.0, x: 0,
+  y: 0.0}
+- {head_pan_joint: 0.61342799999999986, l_elbow_flex_joint: -0.60818060000000007,
+  l_shoulder_lift_joint: 0.84528870000000011, l_shoulder_pan_joint: 0.47939816339819408,
+  l_upper_arm_roll_joint: 1.5734999999999999, l_wrist_roll_joint: 1.2057600000000002,
+  r_elbow_flex_joint: -0.71496040000000005, r_shoulder_lift_joint: 0.65329870000000023,
+  r_shoulder_pan_joint: -0.59639816339831109, r_upper_arm_roll_joint: -1.6768999999999998,
+  r_wrist_roll_joint: -1.8777200000000001, t: 10.0, theta: 0.0, x: -0.8,
+  y: 0}

@@ -1,0 +1,37 @@
+<launch>
+	<arg name="in" />
+	<arg name="out" />
+
+  <node pkg="trajectory_filter_server" name="trajectory_filter1" type="trajectory_filter_server" output="screen">
+   <rosparam command="load" file="$(find trajectory_tutorials)/joint_limits.yaml"/>
+
+   <param name="service_type" value="FilterJointTrajectory" />
+<rosparam param="filter_chain">
+
+  - name: cubic_spline_short_cutter_smoother
+    params: {discretization: 1}
+    type: CubicSplineVelocityScalerFilterJointTrajectory
+</rosparam>
+
+<rosparam param="available_filters">
+- name: numerical_differentiation
+  type: NumericalDifferentiationSplineSmootherFilterJointTrajectory
+
+- name: linear_spline_velocity_scaler
+  type: LinearSplineVelocityScalerFilterJointTrajectory
+
+- name: Fritsch
+  type: FritschButlandSplineSmootherFilterJointTrajectory
+
+- name: cubic_spline_short_cutter_smoother
+  params: {discretization: 1}
+  type: CubicSplineVelocityScalerFilterJointTrajectory
+- name: cubic_parameterized
+  type: CubicParameterizedSplineVelocityScalerFilterJointTrajectory
+  params: {discretization: 3}
+</rosparam>
+
+  </node>
+
+  <node pkg="pr2_trajectory" name="filter" type="filter.py" output="screen" args="$(env PWD)/$(arg in) $(env PWD)/$(arg out)" required="true"/>
+</launch>

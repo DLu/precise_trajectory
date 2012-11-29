@@ -1,0 +1,8 @@
+<launch>
+	<include file="$(find pr2_description)/robots/upload_pr2.launch" />
+	<node name="rviz" type="rviz" pkg="rviz" respawn="true" args="-d $(find pr2_pose_morph)/create.vcg" />
+	<node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
+        <rosparam param="source_list">[jointstates2]</rosparam>
+    </node>
+	<node name="robot_state_publisher" type="state_publisher" pkg="robot_state_publisher" />
+</launch>

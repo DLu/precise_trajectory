@@ -1,0 +1,10 @@
+<launch>
+	<include file="$(find pr2_description)/robots/upload_pr2.launch" />
+	<node name="rviz" type="rviz" pkg="rviz" args="-d $(find retarget)/thepr2.vcg" respawn="true"/>
+	<param name="use_gui" value="False"/>
+	<node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen" respawn="true">
+        <rosparam param="source_list">[/arm_angles]</rosparam>
+    </node>
+	<node name="robot_state_publisher" type="state_publisher" pkg="robot_state_publisher" respawn="true"/>
+</launch>
+

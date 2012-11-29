@@ -1,0 +1,13 @@
+<launch>
+
+  <!--  Arm controllers for mannequin mode -->
+  <rosparam command="load" file="$(find pr2_mannequin_mode)/pr2_arm_controllers_loose.yaml" />
+  <node pkg="pr2_controller_manager" type="spawner" name="spawn_arm_controllers"
+        args="--stopped r_arm_controller_loose l_arm_controller_loose" />
+
+  <!-- Trajectory Locks for Mannequin Modes -->
+  <include file="$(find pr2_mannequin_mode)/trajectory_lock.launch"/>
+
+  <include file="$(find pr2_sith)/duel_core.launch"/>
+
+</launch>

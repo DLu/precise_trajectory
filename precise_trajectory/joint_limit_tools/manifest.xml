@@ -1,0 +1,17 @@
+<package>
+  <description brief="joint_limit_tools">
+
+     joint_limit_tools
+
+  </description>
+  <author>David V. Lu!!</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/joint_limit_tools</url>
+  <depend package="rospy"/>
+  <depend package="urdf_python"/>
+  <depend package="arm_navigation_msgs"/>
+
+</package>
+
+

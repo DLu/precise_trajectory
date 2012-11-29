@@ -1,0 +1,4 @@
+- {head_pan_joint: 2.2732920000000001, t: 0.0, theta: 0.0,  x: 0.0, y: 5.7995319366455078e-05}
+- {head_pan_joint: -1.581682, t: 3.0, theta: -0.5, x: 0.5, y: 5.7995319366455078e-05, r_shoulder_pan_joint: .5}
+- {head_pan_joint: 2.2, t: 5.0, x: 0, y: 0, theta: 0.0, r_shoulder_pan_joint: 0}
+

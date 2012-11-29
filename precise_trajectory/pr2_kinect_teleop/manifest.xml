@@ -1,0 +1,16 @@
+<package>
+  <description brief="Teleop PR2 Using Kinect">
+    Another simple demo that moves the PR2 based on an openni-recognized skeleton
+  </description>
+  <author>David V. Lu!!</author>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/pr2_kinect_teleop</url>
+  <depend package="rospy"/>
+  <depend package="sensor_msgs"/>
+  <depend package="pr2_controllers_msgs"/>
+  <depend package="pr2_gripper_sensor_msgs"/>
+  <depend package="pr2_trajectory"/>
+  <depend package="actionlib"/>
+</package>
+
+

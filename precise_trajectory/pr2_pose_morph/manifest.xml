@@ -1,0 +1,23 @@
+<package>
+  <description brief="pr2_pose_morph">
+
+     pr2_pose_morph
+
+  </description>
+  <author>David!!</author>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/pr2_pose_morph</url>
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+  <depend package="easy_markers"/>
+  <depend package="urdf_python"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="pr2_controllers_msgs"/>
+
+
+</package>
+
+

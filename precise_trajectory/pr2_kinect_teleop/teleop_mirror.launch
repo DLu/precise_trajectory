@@ -1,0 +1,6 @@
+<launch>
+	<node name="kinect_mocap" pkg="kinect_mocap" type="openni_tracker" output="screen" />
+	<node name="kinect_viz" pkg="mocap_visualization" type="kinect.py"/>
+	<node name="retarget" pkg="retarget" type="kinect.py" args="--mirror"/>
+	<node name="kinect_teleop" pkg="pr2_kinect_teleop" type="teleop.py" />
+</launch>
