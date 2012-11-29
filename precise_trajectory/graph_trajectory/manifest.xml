@@ -1,0 +1,16 @@
+<package>
+  <description brief="graph_trajectory">
+
+     graph_trajectory
+
+  </description>
+  <author>David!!</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/graph_trajectory</url>
+  <depend package="rospy"/>
+  <depend package="pr2_precise_trajectory"/>
+
+</package>
+
+
