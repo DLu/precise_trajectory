@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_sith')
 import rospy
-from pr2_sith.lightsaber import RobotController, both_arms, OPEN, CLOSED
+from pr2_precise_trajectory.full_arm_controller import FullArmController, OPEN, CLOSED
 import sys
 import yaml
 import random
-import sys
 from resource_retriever.retriever import get
 
 from dynamic_reconfigure.server import Server
@@ -15,32 +14,19 @@ class Duel:
     def __init__(self):
         self.forward_time = 1.9
         self.back_time = 0.8
-        self.controller = RobotController()
+        self.controller = FullArmController(['r'])
         self.srv = Server(TheForceConfig, self.callback)
 
-    def move_arm(self, movements):
-        for (n, move) in enumerate(movements):
-            time = move.get('time', self.forward_time)
-            arms = []
-            a = 'r'
-            arms.append(a)
-            goal = self.controller.make_trajectory(move[a], time, a)
-            self.controller.start_trajectory(goal, a)
-            transition = move.get('transition', 'wait')
-            if transition=='wait':
-                rospy.sleep(time)
-            elif transition=='impact':
-                rospy.sleep(.1)
-                self.controller.wait_for_impact(arms)
-                goal = self.controller.make_trajectory(self.controller.right_arm(), self.back_time, 'r')
-                self.controller.start_trajectory(goal, 'r')
-                rospy.sleep(self.back_time)
+    def move_arm(self, move):
+        move[0]['time'] = self.forward_time
+        move[1]['time'] = self.back_time
+        self.controller.do_action(move)
 
-    def setup(self):
-        self.move_arm( starts[0] )
-        self.controller.gripper(['r'], OPEN)
+    def setup(self, start):
+        self.controller.do_action(start)
+        self.controller.gripper.change_position(['r'], OPEN)
         raw_input('Press enter to close grip\n')
-        self.controller.gripper(['r'], CLOSED)
+        self.controller.gripper.change_position(['r'], CLOSED)
 
     def callback(self, config, level):
         self.forward_time = config.forward_time
@@ -51,8 +37,6 @@ class Duel:
         return config
 
 if __name__ == '__main__':
-    rospy.init_node('sith')
-
     starts = []
     attacks = []
 
@@ -62,19 +46,21 @@ if __name__ == '__main__':
             scripts.append(movements)
     transitions = [range(1,7), [3,4,5], [1,4,5], [2,3,5,6], range(2,7), [1,2]]
 
+    moves = []
+    for start, attack_indexes in zip(starts, transitions):
+        if start==starts[3]: #never works
+            continue
+        for attack in [ attacks[i-1] for i in attack_indexes ]:
+            moves.append( start + attack )
+
+    rospy.init_node('sith')
     duel = Duel()
 
     if len(sys.argv)>1:
         if sys.argv[1]=='--setup':
-            duel.setup()
+            duel.setup(starts[0])
 
     while not rospy.is_shutdown():
-        start = random.choice(range(1,7))
-        if start==4:
-            continue
-        attack = random.choice( transitions[start-1] )
-        rospy.loginfo("Start %d"%start)
-        duel.move_arm( starts[start-1] )
-        rospy.loginfo("Attack %d"%attack)
-        duel.move_arm( attacks[attack-1] )
+        move = random.choice(moves)
+        duel.move_arm( move )
 
