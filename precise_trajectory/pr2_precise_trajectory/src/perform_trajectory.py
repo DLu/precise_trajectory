@@ -11,6 +11,6 @@ if __name__ == '__main__':
     movements = yaml.load( open(sys.argv[1], 'r'))
     controller = FullArmController()
 
-    controller.start_action(movements)
+    controller.do_action(movements)
     rospy.spin()
 

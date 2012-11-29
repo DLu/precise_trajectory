@@ -17,7 +17,7 @@ class GripperController:
             self.grippers[arm].wait_for_server()        
             rospy.loginfo("[GRIPPER] Got %s controllers"%arm)
 
-    def gripper(self, arms, position, should_wait=True):
+    def change_position(self, arms, position, should_wait=True):
         gg = Pr2GripperCommandGoal()
         gg.command.position = position
         gg.command.max_effort = self.effort

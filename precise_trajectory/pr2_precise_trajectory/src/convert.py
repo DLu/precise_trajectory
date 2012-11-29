@@ -1,8 +1,8 @@
 #!/usr/bin/python
-import roslib; roslib.load_manifest('trajectory_converter')
+import roslib; roslib.load_manifest('pr2_precise_trajectory')
 import rospy
 import sys
-from trajectory_converter import *
+from pr2_precise_trajectory.converter import *
 import pickle
 import yaml
 
