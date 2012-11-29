@@ -1,19 +1,17 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('pr2_trajectory')
+import roslib; roslib.load_manifest('graph_trajectory')
 import rospy
-from trajectory_tools import load_trajectory
-from pr2_trajectory import *
+from pr2_precise_trajectory.converter import load_trajectory
+from graph_trajectory import *
 import sys
 import os.path
 
 if __name__ == '__main__':
-    rospy.init_node('pr2_trajectory')
-
     args = sys.argv[1:]
     args.reverse()
     
     for arg in args:
-        trajectory = load_trajectory( open(arg) )
+        trajectory = load_trajectory( arg )
         if arg == args[-1]:
             width = 2
             ms = 8
