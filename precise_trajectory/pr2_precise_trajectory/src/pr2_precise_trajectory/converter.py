@@ -1,4 +1,5 @@
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
+from sensor_msgs.msg import JointState
 
 def simple_to_message_single(angles, duration, arm):
     movements = {arm: angles, 'time': duration}
@@ -57,6 +58,21 @@ def trajectory_to_simple(trajectory, fill_missing_with_zeros=True):
         arr.append(m)
     return arr
     
+def simple_to_joint_states(movements, default_time=3.0, start_time=None):
+    arr = []
+    if start_time is None:
+        start_time = rospy.Time.now()
+    for move in movements:
+        start_time += rospy.Duration( move.get('time', default_time) )
+        state = JointState()
+        state.header.stamp = start_time
+        for arm in ['l', 'r']:
+            if arm not in move:
+                continue
+            state.name += get_arm_joint_names(arm)
+            state.position += move[arm]
+        arr.append(state)
+    return arr
 
 def tprint(movements):
     for move in movements:
