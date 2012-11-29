@@ -4,6 +4,7 @@ from pr2_precise_trajectory.arm_controller import *
 from pr2_precise_trajectory.gripper_controller import *
 from pr2_precise_trajectory.impact_watcher import *
 from pr2_precise_trajectory.joint_watcher import *
+from trajectory_converter import simple_to_message
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 class FullArmController:
@@ -17,6 +18,11 @@ class FullArmController:
         self.grippers = GripperController(arms)
         self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in arms])
         self.joint_watcher = JointWatcher(joint_names)
+
+    def start_action(self, movements, arms):
+        for arm in arms:
+            trajectory = simple_to_message(movements, arm)
+            self.arms[arm].start_trajectory(trajectory, wait=False)
 
     def stop_arm(self, arms, time=0.8):
         for arm in arms:
