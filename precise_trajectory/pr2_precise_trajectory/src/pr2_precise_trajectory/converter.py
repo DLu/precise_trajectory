@@ -1,7 +1,9 @@
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from sensor_msgs.msg import JointState
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import pickle
 import yaml
+import rospy
 
 def load_trajectory(filename):
     if ".traj" in filename:
@@ -21,7 +23,7 @@ def save_trajectory(trajectory, filename):
 
 def simple_to_message_single(angles, duration, arm):
     movements = {arm: angles, 'time': duration}
-    return simple_to_message(movements)
+    return simple_to_message([movements], arm)
 
 def simple_to_message(movements, arm, default_time=3.0):
     trajectory = JointTrajectory()

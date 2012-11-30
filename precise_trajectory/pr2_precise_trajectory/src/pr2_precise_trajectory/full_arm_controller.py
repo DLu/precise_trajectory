@@ -4,7 +4,7 @@ from pr2_precise_trajectory.arm_controller import *
 from pr2_precise_trajectory.gripper_controller import *
 from pr2_precise_trajectory.impact_watcher import *
 from pr2_precise_trajectory.joint_watcher import *
-from pr2_precise_trajectory.converter import simple_to_message
+from pr2_precise_trajectory.converter import simple_to_message, simple_to_message_single
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 class FullArmController:
@@ -22,6 +22,7 @@ class FullArmController:
     def do_action(self, movements):
         if len(movements)==0:
             return
+        arms = self.arms.keys()
 
         first = movements[0]
         chunks = [[first]]
@@ -45,12 +46,13 @@ class FullArmController:
                     self.arms[arm].wait()
             elif transition=='impact':
                 rospy.sleep(.1)
-                self.impact.wait_for_impact(arms)
+                self.impacts.wait_for_impact()
                 self.stop_arm(arms)
 
     def stop_arm(self, arms, time=0.1):
         for arm in arms:
-            self.do_trajectory_short(self.joint_watcher.get_positions(get_arm_joint_names(arm)), time, arm, wait=False)
-        rospy.sleep(self.back_time)
+            trajectory = simple_to_message_single(self.joint_watcher.get_positions(get_arm_joint_names(arm)), time, arm)
+            self.arms[arm].start_trajectory(trajectory, wait=False)
+        rospy.sleep(time)
 
 

@@ -16,8 +16,8 @@ class JointWatcher:
 
     def joint_cb(self, msg):
         pos = []
-        for i, name in enumerate(msg.names):
-            if name in name_set:
+        for i, name in enumerate(msg.name):
+            if name in self.name_set:
                 self.joint_pos[name] = msg.position[i]
                 pos.append(msg.position[i])
         if self.start_time is not None and not self.done:

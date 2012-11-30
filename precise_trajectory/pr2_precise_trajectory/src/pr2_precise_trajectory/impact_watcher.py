@@ -8,7 +8,7 @@ import trajectory_msgs.msg
 
 class ImpactWatcher:
     def __init__(self, names=['r_gripper_sensor_controller'], rate=200):
-        self.accel = rospy.get_param('acceleration_trigger', 6.0)
+        self.accel = rospy.get_param('acceleration_trigger', 70.0)
         self.slip = rospy.get_param('slip_trigger', 0.008)
         self.trigger = PR2GripperEventDetectorCommand.ACC  # use just acceleration as our contact signal
         self.clients = {}
@@ -27,7 +27,7 @@ class ImpactWatcher:
         place_goal.command.acceleration_trigger_magnitude = self.accel  # m/^2
         place_goal.command.slip_trigger_magnitude            = self.slip     # slip gain
 
-        for name, client in self.clients:
+        for name, client in self.clients.iteritems():
             client.send_goal(place_goal)
 
         #wait for a slap
@@ -36,7 +36,7 @@ class ImpactWatcher:
 
     def is_slap_done(self):
         done = True
-        for name, client in self.clients:
+        for name, client in self.clients.iteritems():
             done = done and client.get_state() > SimpleGoalState.ACTIVE
         return done
 
