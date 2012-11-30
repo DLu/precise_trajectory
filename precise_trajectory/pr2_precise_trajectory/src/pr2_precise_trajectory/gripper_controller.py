@@ -11,7 +11,7 @@ class GripperController:
         self.effort = -1.0
         self.grippers = {}
         for arm in arms:
-            self.grippers[arm] = SimpleActionClient("%s_gripper_sensor_controller/gripper_action"%arm, Pr2GripperCommandAction)
+            self.grippers[arm] = SimpleActionClient("%s_gripper_controller/gripper_action"%arm, Pr2GripperCommandAction)
             #wait for the action servers to come up 
             rospy.loginfo("[GRIPPER] Waiting for %s controllers"%arm)
             self.grippers[arm].wait_for_server()        
