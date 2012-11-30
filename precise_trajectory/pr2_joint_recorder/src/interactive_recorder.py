@@ -22,7 +22,6 @@ class InteractiveRecorder:
     def __init__(self, arms, filename):
         rospy.init_node('interactive_recorder')
         self.time = None
-        self.positions = {}
         self.filename = filename
         self.arms = arms
         self.mi = 0
@@ -39,7 +38,7 @@ class InteractiveRecorder:
         else:
             self.movements = []
 
-        self.controller = FullArmController()
+        self.controller = FullArmController(arms=arms)
         rospy.loginfo("Waiting for control manager")
         rospy.wait_for_service('pr2_controller_manager/switch_controller')
         rospy.loginfo("Got control manager!")
@@ -68,21 +67,16 @@ class InteractiveRecorder:
     def save_as_next(self):
         self.save(self.mi + 1, insert=True)
 
-    def joint_cb(self, msg):
-        for (name, pos) in zip(msg.name, msg.position):
-            self.positions[name] = pos
-
     def save(self, index, insert=False):
+        if len(self.movements)==0:
+            insert = True
         if not insert:
             m = self.movements[index]
         else:
             m = {}
 
         for arm in self.arms:
-            arr = []
-            for j in ARM_JOINTS:
-                arr.append( self.positions['%s_%s' % (arm, j)] )
-            m[arm] = arr
+            m[arm] = self.jwatcher.get_positions( get_arm_joint_names(arm) )
 
         if insert and index < len(self.movements):
             t = self.movements[index].get('time', DEFAULT_TIME)
@@ -164,13 +158,14 @@ class InteractiveRecorder:
         f.close()
 
     def switch_to(self, newname):
-        rospy.loginfo("Switching to %s"%newname);
         start = []
         stop = []
         for arm in self.arms:
+            cname = newname % arm
+            rospy.loginfo("Switching to %s"%cname)
             stop.append( self.controllers[arm] ) 
-            start.append( newname%arm ) 
-            self.controllers[arm] = newname%arm
+            start.append( cname ) 
+            self.controllers[arm] = cname
         self.switcher(start, stop, 1)
 
     def spin(self):
