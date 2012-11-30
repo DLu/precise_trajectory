@@ -8,7 +8,7 @@ def load_trajectory(filename):
         trajectory = pickle.load(open(filename, 'r'))
         return trajectory_to_simple( trajectory )
     elif '.yaml' in filename:
-        return yaml.load( open(sys.argv[1], 'r'))
+        return yaml.load( open(filename, 'r'))
     else:
         print "Unknown file type"
         return None
