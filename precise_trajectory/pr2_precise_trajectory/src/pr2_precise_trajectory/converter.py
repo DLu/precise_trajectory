@@ -1,3 +1,4 @@
+import roslib; roslib.load_manifest('pr2_precise_trajectory')
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -28,7 +29,7 @@ def simple_to_message_single(angles, duration, arm):
 def simple_to_message(movements, arm, default_time=3.0):
     trajectory = JointTrajectory()
     trajectory.joint_names = get_arm_joint_names(arm)
-
+    trajectory.header.stamp = rospy.Time.now()
     t=0
     for move in movements:
         pt = JointTrajectoryPoint()
