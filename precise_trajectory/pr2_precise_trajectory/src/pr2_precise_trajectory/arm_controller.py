@@ -12,12 +12,12 @@ def get_arm_joint_names(side):
     return [ '%s_%s' % (side, name) for name in ARM_JOINTS ]
 
 class ArmController:
-    def __init__(self, name):
-        self.arm = SimpleActionClient("%s/joint_trajectory_action"%name, JointTrajectoryAction)
+    def __init__(self, arm):
+        self.arm = SimpleActionClient("%s_arm_controller/joint_trajectory_action"%arm, JointTrajectoryAction)
         #wait for the action servers to come up 
-        rospy.loginfo("[ARM] Waiting for %s"%name)
-        self.arms.wait_for_server()
-        rospy.loginfo("[ARM] Got %s"%name)
+        rospy.loginfo("[ARM] Waiting for %s controller"%arm)
+        self.arm.wait_for_server()
+        rospy.loginfo("[ARM] Got %s controller"%arm)
 
     def start_trajectory(self, trajectory, set_time_stamp=True, wait=True):
         """Creates an action from the trajectory and sends it to the server"""
