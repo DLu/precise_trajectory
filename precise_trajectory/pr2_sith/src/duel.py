@@ -24,9 +24,9 @@ class Duel:
 
     def setup(self, start):
         self.controller.do_action(start)
-        self.controller.gripper.change_position(['r'], OPEN)
+        self.controller.grippers.change_position(['r'], OPEN)
         raw_input('Press enter to close grip\n')
-        self.controller.gripper.change_position(['r'], CLOSED)
+        self.controller.grippers.change_position(['r'], CLOSED)
 
     def callback(self, config, level):
         self.forward_time = config.forward_time
