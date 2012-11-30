@@ -4,29 +4,13 @@ import rospy
 import sys
 import yaml
 import os.path
+from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
-from sensor_msgs.msg import Joy
-from pr2_sith.lightsaber import RobotController
+from pr2_precise_trajectory.full_arm_controller import FullArmController
+from pr2_precise_trajectory.arm_controller import get_arm_joint_names
+from pr2_precise_trajectory.joint_watcher import JointWatcher
+from pr2_precise_trajectory.converter import *
 from pr2_mechanism_msgs.srv import SwitchController
-
-SAVE_AS_CURRENT = 14 # X
-SAVE_AS_NEXT    = 13 # O
-DELETE          = 12 # TRIANGLE
-SET_IMPACT      = 15 # SQUARE
-
-GO_FORWARD      = 5  # RIGHT
-GO_BACK         = 7  # LEFT
-PLAY_FROM_HERE  = 0  # SELECT
-PLAY_FROM_START = 3  # START
-TO_FILE         = 16 # PS3 
-
-PLUS_TIME       = 11 # R1
-PLUS_TIME_BIG   = 9  # R2
-MINUS_TIME      = 10 # L1
-MINUS_TIME_BIG  = 8  # L2
-
-ARM_JOINTS = ["shoulder_pan_joint", "shoulder_lift_joint", "upper_arm_roll_joint",
-             "elbow_flex_joint", "forearm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
 
 MANNEQUIN_CONTROLLER = '%s_arm_controller_loose'
 POSITION_CONTROLLER = '%s_arm_controller'
@@ -44,17 +28,18 @@ class InteractiveRecorder:
         self.mi = 0
         
         self.controllers = {}
+        names = []
         for arm in self.arms:
             self.controllers[arm] = POSITION_CONTROLLER % arm
+            names += get_arm_joint_names(arm)
+        self.jwatcher = JointWatcher(names)
 
         if os.path.exists(self.filename):
-            self.movements = yaml.load( open(self.filename, 'r'))
+            self.movements = load_trajectory(self.filename)
         else:
             self.movements = []
-        
-        self.sub1 = rospy.Subscriber('/joint_states', JointState, self.joint_cb)
-        self.sub2 = rospy.Subscriber('/joy', Joy, self.joy_cb)
-        self.controller = RobotController()
+
+        self.controller = FullArmController()
         rospy.loginfo("Waiting for control manager")
         rospy.wait_for_service('pr2_controller_manager/switch_controller')
         rospy.loginfo("Got control manager!")
@@ -62,46 +47,30 @@ class InteractiveRecorder:
 
         self.switch_to(MANNEQUIN_CONTROLLER)
 
+        self.joy = JoyListener(BUTTON_LAG)
+        self.joy[ PS3('x') ] = self.save_as_current
+        self.joy[ PS3('circle') ] = self.save_as_next 
+        self.joy[ PS3('triangle') ] = self.delete
+        self.joy[ PS3('square') ] = self.set_impact
+        self.joy[ PS3('right') ] = lambda: self.goto(1)
+        self.joy[ PS3('left') ] = lambda: self.goto(-1)
+        self.joy[ PS3('select') ] = self.play # play from here
+        self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
+        self.joy[ PS3('ps3') ] = self.to_file
+        self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
+        self.joy[ PS3('r2') ] = lambda: self.change_time(1.5)
+        self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
+        self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
+
+    def save_as_current(self):
+        self.save(self.mi)
+
+    def save_as_next(self):
+        self.save(self.mi + 1, insert=True)
 
     def joint_cb(self, msg):
         for (name, pos) in zip(msg.name, msg.position):
             self.positions[name] = pos
-
-    def joy_cb(self, msg):
-        buttons = msg.buttons
-        if self.time is not None and (rospy.get_rostime() - self.time).to_sec() < BUTTON_LAG:
-            return
-
-        if buttons[SAVE_AS_CURRENT]:
-            self.save(self.mi)
-        elif buttons[SAVE_AS_NEXT]:
-            self.save(self.mi + 1, insert=True)
-        elif buttons[DELETE]:
-            self.delete()
-        elif buttons[SET_IMPACT]:
-            self.set_impact()
-        elif buttons[GO_FORWARD]:
-            self.goto(self.mi+1)
-        elif buttons[GO_BACK]:
-            self.goto(self.mi-1)
-        elif buttons[PLAY_FROM_HERE]:
-            self.play(self.mi)
-        elif buttons[PLAY_FROM_START]:
-            self.play(0)
-        elif buttons[PLUS_TIME]:
-            self.change_time(1.1)
-        elif buttons[PLUS_TIME_BIG]:
-            self.change_time(1.5)
-        elif buttons[MINUS_TIME]:
-            self.change_time(.9)
-        elif buttons[MINUS_TIME_BIG]:
-            self.change_time(.5)
-        elif buttons[TO_FILE]:
-            self.to_file()
-        else:
-            return
-
-        self.time = rospy.get_rostime()
 
     def save(self, index, insert=False):
         if not insert:
@@ -139,7 +108,7 @@ class InteractiveRecorder:
             t2 = self.movements[self.mi+1].get('time', DEFAULT_TIME)
             self.movements[self.mi+1]['time'] = t + t2
             self.movements = self.movements[:self.mi] + self.movements[self.mi+1:]
-        self.goto(self.mi)
+        self.goto(0)
 
     def set_impact(self):
         if self.mi >= len(self.movements):
@@ -164,19 +133,17 @@ class InteractiveRecorder:
 
     def start_action(self, movements):
         self.switch_to(POSITION_CONTROLLER)
-        for arm in self.arms:
-            goal = self.controller.make_trajectory_long(movements, arm)
-            self.controller.start_trajectory(goal, arm)
-        time = sum([m.get('time', DEFAULT_TIME) for m in movements])
-        rospy.sleep(time / self.controller.speedup)
-        self.mi = len(self.movements)-1
+        self.controller.do_action(movements)
         self.switch_to(MANNEQUIN_CONTROLLER)
 
-
-    def play(self, starti):
+    def play(self, starti=None):
+        if starti is None:
+            starti = self.mi
         self.start_action( self.movements[starti:] )
+        self.mi = len(self.movements)-1
 
-    def goto(self, ni):
+    def goto(self, delta):
+        ni = self.mi + delta
         if ni < 0 or ni >= len(self.movements):
             return
 
