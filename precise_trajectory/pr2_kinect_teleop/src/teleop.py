@@ -2,7 +2,7 @@
 import roslib; roslib.load_manifest('pr2_kinect_teleop')
 import rospy
 from pr2_precise_trajectory.arm_controller import ArmController, get_arm_joint_names
-from pr2_precise_trajectory.converter import simple_to_message
+from pr2_precise_trajectory.converter import simple_to_message_single
 from sensor_msgs.msg import JointState
 
 #For head motion
@@ -50,11 +50,11 @@ class ArmJoint:
         if len(hist) > 0:
             return hist[-1]
         else:
-            return [0.0] * len(ARM_JOINTS)
+            return [0.0] * len(get_arm_joint_names(arm))
 
     def get_velocities(self, arm):
         v = []
-        for (i, joint) in enumerate(ARM_JOINTS):
+        for (i, joint) in enumerate(get_arm_joint_names(arm)):
             pos = [a[i] for a in self.joint_histories[arm]]
             if len(pos)!=0:
                 v.append( sum(pos)/len(pos) )
@@ -68,10 +68,7 @@ class ArmJoint:
 
         while not rospy.is_shutdown():
             for arm in self.arms:
-                m = {}
-                m[arm] = self.get_positions(arm)
-                m['time'] = 1.0 / hz
-                trajectory = simple_to_message(m, arm)
+                trajectory = simple_to_message_single(self.get_positions(arm), 1.0 / hz, arm)
                 self.arms[arm].start_trajectory(trajectory, wait=False)
             r.sleep()
 
