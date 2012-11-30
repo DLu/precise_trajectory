@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('pr2_trajectory')
+import roslib; roslib.load_manifest('modify_trajectory')
 import rospy
 import trajectory_msgs.msg
 from trajectory_tools import load_trajectory, write_trajectory

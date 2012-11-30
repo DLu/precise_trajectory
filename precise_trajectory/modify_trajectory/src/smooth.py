@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('pr2_trajectory')
+import roslib; roslib.load_manifest('modify_trajectory')
 import rospy
 import trajectory_msgs.msg
 from trajectory_tools import load_trajectory, write_trajectory
 from pr2_trajectory import kinect_to_pr2, traj_to_joint_state
 import sys
+
+#Smooth velocities
 
 if __name__ == '__main__':
     rospy.init_node('pr2_trajectory')
