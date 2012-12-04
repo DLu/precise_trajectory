@@ -2,12 +2,13 @@ import roslib; roslib.load_manifest('pr2_precise_trajectory')
 import rospy
 from pr2_precise_trajectory.arm_controller import *
 from pr2_precise_trajectory.gripper_controller import *
+from pr2_precise_trajectory.base_controller import *
 from pr2_precise_trajectory.impact_watcher import *
 from pr2_precise_trajectory.joint_watcher import *
 from pr2_precise_trajectory.converter import simple_to_message, simple_to_message_single
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
-class FullArmController:
+class FullPr2Controller:
     def __init__(self, arms=['l', 'r']):
         self.arms = {}
 
@@ -16,10 +17,11 @@ class FullArmController:
             self.arms[arm] = ArmController(arm)
             joint_names += get_arm_joint_names(arm)
         self.grippers = GripperController(arms)
+        self.base = BaseController()
         self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in arms])
         self.joint_watcher = JointWatcher(joint_names)
 
-    def do_action(self, movements):
+    def do_action(self, movements): #TODO Add Base
         if len(movements)==0:
             return
         arms = self.arms.keys()

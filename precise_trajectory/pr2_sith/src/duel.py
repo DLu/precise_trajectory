@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_sith')
 import rospy
-from pr2_precise_trajectory.full_arm_controller import FullArmController, OPEN, CLOSED
+from pr2_precise_trajectory.full_controller import FullPr2Controller, OPEN, CLOSED
 import sys
 import yaml
 import random
@@ -14,7 +14,7 @@ class Duel:
     def __init__(self):
         self.forward_time = 1.9
         self.back_time = 0.8
-        self.controller = FullArmController(['r'])
+        self.controller = FullPr2Controller(['r'])
         self.srv = Server(TheForceConfig, self.callback)
 
     def move_arm(self, move):

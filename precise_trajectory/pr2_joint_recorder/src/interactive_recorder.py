@@ -6,7 +6,7 @@ import yaml
 import os.path
 from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
-from pr2_precise_trajectory.full_arm_controller import FullArmController
+from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.joint_watcher import JointWatcher
 from pr2_precise_trajectory.converter import *
@@ -38,7 +38,7 @@ class InteractiveRecorder:
         else:
             self.movements = []
 
-        self.controller = FullArmController(arms=arms)
+        self.controller = FullPr2Controller(arms=arms)
         rospy.loginfo("Waiting for control manager")
         rospy.wait_for_service('pr2_controller_manager/switch_controller')
         rospy.loginfo("Got control manager!")
