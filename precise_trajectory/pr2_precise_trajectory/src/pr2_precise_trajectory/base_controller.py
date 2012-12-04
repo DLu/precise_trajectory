@@ -1,29 +1,34 @@
-#!/usr/bin/python
-
-import roslib; roslib.load_manifest('pr2_pose_morph')
+import roslib; roslib.load_manifest('pr2_precise_trajectory')
 import rospy
 import tf
 import actionlib
-from  geometry_msgs.msg import Pose, Twist, TransformStamped, PoseStamped
-from    sensor_msgs.msg import JointState
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from  geometry_msgs.msg import Twist, PoseStamped
+from tf.transformations import euler_from_quaternion
 from pr2_pose_morph.msg import *
+from math import copysign
 
-class PoseMorph:
+def orientation_to_euler(orientation):
+    return euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
+
+class BaseController:
     def __init__(self):
-        rospy.init_node('pr2_move_sequence_server')
         self.cmd_pub = rospy.Publisher('/base_controller/command', Twist)
         self.tf = tf.TransformListener()
-        self.server = actionlib.SimpleActionServer('/base_controller/move_sequence', MoveSequenceAction, self.execute, False) # check false
+        self.server = actionlib.SimpleActionServer('/base_controller/move_sequence', MoveSequenceAction, self.execute, False) 
         self.server.start()
-        rospy.loginfo("Ready!")
+
+        self.frame = rospy.get_param('frame_id', '/base_footprint')
+        self.tlim = rospy.get_param('translation_speed_limit', 1.2)
+        self.rlim = rospy.get_param('rotation_speed_limit', 1.4)
+
+        rospy.loginfo("[BASE] Ready!")
 
     def execute(self, goal):
         r = rospy.Rate(100)
 
+        # wait to start
         while rospy.Time.now() < goal.header.stamp:
             r.sleep()
-        rospy.loginfo("And go!")
 
         feedback = MoveSequenceFeedback()
         for pose, time in zip(goal.poses, goal.times):
@@ -33,10 +38,10 @@ class PoseMorph:
             goal_pose.pose = pose
 
             while rospy.Time.now() <= goal_time:
-                relative = self.tf.transformPose('/base_footprint', goal_pose)
+                relative = self.tf.transformPose(self.footprint, goal_pose)
                 dx = relative.pose.position.x
                 dy = relative.pose.position.y
-                rot = euler_from_quaternion([relative.pose.orientation.x, relative.pose.orientation.y, relative.pose.orientation.z, relative.pose.orientation.w])
+                rot = orientation_to_euler(relative.pose.orientation)
                 dz = rot[2]
 
                 t = (goal_time - rospy.Time.now()).to_sec()
@@ -48,15 +53,14 @@ class PoseMorph:
                 cmd.linear.y = dy/t
                 cmd.angular.z = dz/t
 
-                tlim = 1.2
                 alim = 1.4
 
-                if abs(cmd.linear.x) > tlim:
-                    cmd.linear.x *= tlim / abs(cmd.linear.x)
+                if abs(cmd.linear.x) > self.tlim:
+                    cmd.linear.x = copysign(self.tlim, cmd.linear.x)
                 if abs(cmd.linear.y) > tlim:
-                    cmd.linear.y *= tlim / abs(cmd.linear.y)
+                    cmd.linear.y = copysign(self.tlim, cmd.linear.y)
                 if abs(cmd.angular.z) > alim:
-                    cmd.angular.z *= alim / abs(cmd.angular.z)
+                    cmd.angular.z = copysign(self.rlim, cmd.angular.z)
 
                 self.cmd_pub.publish(cmd)
                 feedback.percent_complete = t / time
