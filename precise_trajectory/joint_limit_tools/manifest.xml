@@ -11,6 +11,7 @@
   <depend package="rospy"/>
   <depend package="urdf_python"/>
   <depend package="arm_navigation_msgs"/>
+  <depend package="pr2_precise_trajectory"/>
 
 </package>
 

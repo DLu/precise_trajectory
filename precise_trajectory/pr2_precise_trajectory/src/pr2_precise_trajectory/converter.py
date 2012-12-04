@@ -16,9 +16,9 @@ def load_trajectory(filename):
         print "Unknown file type"
         return None
 
-def save_trajectory(trajectory, filename):
+def save_trajectory(trajectory, filename, width=1000):
     f = open(filename, 'w')
-    f.write(yaml.dump(trajectory))
+    f.write(yaml.dump(trajectory, width=width))
     f.close()
 
 
