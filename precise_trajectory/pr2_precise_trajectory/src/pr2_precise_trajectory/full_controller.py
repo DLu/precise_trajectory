@@ -18,10 +18,11 @@ class FullPr2Controller:
             joint_names += get_arm_joint_names(arm)
         self.grippers = GripperController(arms)
         self.base = BaseController()
+        self.head = HeadController()
         self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in arms])
         self.joint_watcher = JointWatcher(joint_names)
 
-    def do_action(self, movements): #TODO Add Base
+    def do_action(self, movements): #TODO Add Base, Head, Gripper
         if len(movements)==0:
             return
         arms = self.arms.keys()

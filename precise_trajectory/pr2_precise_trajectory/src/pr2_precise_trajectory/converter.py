@@ -1,5 +1,6 @@
 import roslib; roslib.load_manifest('pr2_precise_trajectory')
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
+from pr2_precise_trajectory.head_controller import HEAD_JOINTS
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import pickle
@@ -22,18 +23,21 @@ def save_trajectory(trajectory, filename, width=1000):
     f.close()
 
 
-def simple_to_message_single(angles, duration, arm):
-    movements = {arm: angles, 'time': duration}
-    return simple_to_message([movements], arm)
+def simple_to_message_single(angles, duration, key):
+    movements = {key: angles, 'time': duration}
+    return simple_to_message([movements], key)
 
-def simple_to_message(movements, arm, default_time=3.0):
+def simple_to_message(movements, key, default_time=3.0):
     trajectory = JointTrajectory()
-    trajectory.joint_names = get_arm_joint_names(arm)
+    if key=='b':
+        trajectory.joint_names = HEAD_JOINTS
+    else:
+        trajectory.joint_names = get_arm_joint_names(key)
     trajectory.header.stamp = rospy.Time.now()
     t=0
     for move in movements:
         pt = JointTrajectoryPoint()
-        pt.positions = move[arm]
+        pt.positions = move[key]
         t+= move.get('time', default_time)
         pt.time_from_start = rospy.Duration(t)
         #pt.velocities = [0.0]*7
@@ -49,9 +53,9 @@ def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
             pose = move['b']
             nav_goal.times.append(t-J)
             p = Pose()
-            p.position.x = pose.get('x', 0.0)
-            p.position.y = pose.get('y', 0.0)
-            q = quaternion_from_euler(0, 0, pose.get('theta', 0.0))
+            p.position.x = pose[0]
+            p.position.y = pose[1]
+            q = quaternion_from_euler(0, 0, pose[2])
             p.orientation.x = q[0]
             p.orientation.y = q[1]
             p.orientation.z = q[2]
