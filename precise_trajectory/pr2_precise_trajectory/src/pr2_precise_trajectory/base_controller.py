@@ -10,18 +10,30 @@ from math import copysign
 def orientation_to_euler(orientation):
     return euler_from_quaternion([orientation.x, orientation.y, orientation.z, orientation.w])
 
+ACTION_NAME = '/base_controller/move_sequence'
+
 class BaseController:
     def __init__(self):
         self.cmd_pub = rospy.Publisher('/base_controller/command', Twist)
         self.tf = tf.TransformListener()
-        self.server = actionlib.SimpleActionServer('/base_controller/move_sequence', MoveSequenceAction, self.execute, False) 
+        self.server = actionlib.SimpleActionServer(ACTION_NAME, MoveSequenceAction, self.execute, False) 
         self.server.start()
+
+        self.client = actionlib.SimpleActionClient(ACTION_NAME, MoveSequenceAction)
+        rospy.loginfo("[BASE] Waiting for %s..."%ACTION_NAME)
+        self.client.wait_for_server()
 
         self.frame = rospy.get_param('frame_id', '/base_footprint')
         self.tlim = rospy.get_param('translation_speed_limit', 1.2)
         self.rlim = rospy.get_param('rotation_speed_limit', 1.4)
 
         rospy.loginfo("[BASE] Ready!")
+
+    def send_goal(self, goal):
+        self.client.send_goal(goal)
+
+    def wait_for_goal(self):
+        self.client.wait_for_result()
 
     def execute(self, goal):
         r = rospy.Rate(100)

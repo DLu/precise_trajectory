@@ -40,6 +40,29 @@ def simple_to_message(movements, arm, default_time=3.0):
         trajectory.points.append(pt)
     return trajectory
 
+def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
+    nav_goal = MoveSequenceGoal()
+    nav_goal.header.frame_id = frame
+    for move in movements:
+        t = move['time']
+        if 'b' in move:
+            pose = move['b']
+            nav_goal.times.append(t-J)
+            p = Pose()
+            p.position.x = pose.get('x', 0.0)
+            p.position.y = pose.get('y', 0.0)
+            q = quaternion_from_euler(0, 0, pose.get('theta', 0.0))
+            p.orientation.x = q[0]
+            p.orientation.y = q[1]
+            p.orientation.z = q[2]
+            p.orientation.w = q[3]
+            nav_goal.poses.append(p)
+    if now is None:
+        now = rospy.Time.now()
+    nav_goal.header.stamp = now + rospy.Duration(delay)
+    return nav_goal
+
+
 def trajectory_to_simple(trajectory, fill_missing_with_zeros=True):
     indexes = {}
     for arm in ['l', 'r']:
