@@ -1,32 +1,38 @@
 import roslib; roslib.load_manifest('pr2_precise_trajectory')
+from pr2_precise_trajectory import *
 import rospy
 from sensor_msgs.msg import JointState
 
 class JointWatcher:
-    def __init__(self, names):
-        self.name_list = names
-        self.name_set = set(names)
+    def __init__(self, name_map):
+        self.name_map = name_map
+        self.key_map = {}
+        for key, names in name_map.iteritems():
+            for name in names:
+                self.key_map[name] = key
+
+        self.state = {}
         self.data = []
         self.start_time = None
         self.done = False
 
-        self.joint_sub = rospy.Subscriber('/joint_states', JointState, self.joint_cb)
-        self.joint_pos = {}
-        
+        self.joint_sub = rospy.Subscriber('/joint_states', JointState, self.joint_cb)        
 
     def joint_cb(self, msg):
-        pos = []
-        for i, name in enumerate(msg.name):
-            if name in self.name_set:
-                self.joint_pos[name] = msg.position[i]
-                pos.append(msg.position[i])
-        if self.start_time is not None and not self.done:
-            self.data.append(pos)
+        self.state = {}
+        for key, names in self.name_map.iteritems():
+            pos = []
+            for name in names:
+                i = msg.name.index(name) 
+                pos.append( msg.position[i] )
+            self.state[key] = pos
+        self.state[TIME] = msg.header.stamp
 
-    def get_positions(self, names=None):
-        if names is None:
-            names = self.name_list
-        return [ self.joint_pos[name] for name in names ]
+        if self.start_time is not None and not self.done:
+            self.data.append(self.state)
+
+    def get_state(self):
+        return self.state
 
     def record(self):
         self.start_time = rospy.Time.now()
@@ -34,4 +40,14 @@ class JointWatcher:
     
     def stop(self):
         self.done = True
+        last = None
+        for move in self.data:
+            if last is None:
+                last = move[TIME]
+                move[TIME] = 0.0
+            else:
+                temp = move[TIME]
+                move[TIME] = temp - last
+                last = temp
+        reutn self.data
 
