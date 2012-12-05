@@ -1,4 +1,5 @@
 import roslib; roslib.load_manifest('pr2_precise_trajectory')
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.head_controller import HEAD_JOINTS
 from sensor_msgs.msg import JointState
@@ -24,21 +25,21 @@ def save_trajectory(trajectory, filename, width=1000):
 
 
 def simple_to_message_single(angles, duration, key):
-    movements = {key: angles, 'time': duration}
+    movements = {key: angles, TIME: duration}
     return simple_to_message([movements], key)
 
-def simple_to_message(movements, key, default_time=3.0):
+def simple_to_message(movements, key):
     trajectory = JointTrajectory()
-    if key=='b':
+    if key==HEAD:
         trajectory.joint_names = HEAD_JOINTS
     else:
         trajectory.joint_names = get_arm_joint_names(key)
     trajectory.header.stamp = rospy.Time.now()
     t=0
-    for move in movements:
+    for move in precise_subset(movements, key):
         pt = JointTrajectoryPoint()
         pt.positions = move[key]
-        t+= move.get('time', default_time)
+        t+= get_time(move)
         pt.time_from_start = rospy.Duration(t)
         #pt.velocities = [0.0]*7
         trajectory.points.append(pt)
@@ -47,20 +48,19 @@ def simple_to_message(movements, key, default_time=3.0):
 def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
     nav_goal = MoveSequenceGoal()
     nav_goal.header.frame_id = frame
-    for move in movements:
-        t = move['time']
-        if 'b' in move:
-            pose = move['b']
-            nav_goal.times.append(t-J)
-            p = Pose()
-            p.position.x = pose[0]
-            p.position.y = pose[1]
-            q = quaternion_from_euler(0, 0, pose[2])
-            p.orientation.x = q[0]
-            p.orientation.y = q[1]
-            p.orientation.z = q[2]
-            p.orientation.w = q[3]
-            nav_goal.poses.append(p)
+    for move in precise_subset(movements, BASE):
+        t = get_time(move)
+        pose = move[BASE]
+        nav_goal.times.append(t-J)
+        p = Pose()
+        p.position.x = pose[0]
+        p.position.y = pose[1]
+        q = quaternion_from_euler(0, 0, pose[2])
+        p.orientation.x = q[0]
+        p.orientation.y = q[1]
+        p.orientation.z = q[2]
+        p.orientation.w = q[3]
+        nav_goal.poses.append(p)
     if now is None:
         now = rospy.Time.now()
     nav_goal.header.stamp = now + rospy.Duration(delay)
@@ -69,7 +69,7 @@ def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
 
 def trajectory_to_simple(trajectory, fill_missing_with_zeros=True):
     indexes = {}
-    for arm in ['l', 'r']:
+    for arm in [LEFT, RIGHT]:
         idx = []
         found = 0
         missing = 0
@@ -101,20 +101,20 @@ def trajectory_to_simple(trajectory, fill_missing_with_zeros=True):
                     m[arm].append( point.positions[index] ) 
             #TODO Velocity
         time = point.time_from_start.to_sec()
-        m['time'] = time- last_time
+        m[TIME] = time - last_time
         last_time = time
         arr.append(m)
     return arr
     
-def simple_to_joint_states(movements, default_time=3.0, start_time=None):
+def simple_to_joint_states(movements, start_time=None):
     arr = []
     if start_time is None:
         start_time = rospy.Time.now()
     for move in movements:
-        start_time += rospy.Duration( move.get('time', default_time) )
+        start_time += rospy.Duration( get_time(move) )
         state = JointState()
         state.header.stamp = start_time
-        for arm in ['l', 'r']:
+        for arm in [LEFT, RIGHT]:
             if arm not in move:
                 continue
             state.name += get_arm_joint_names(arm)
@@ -124,12 +124,13 @@ def simple_to_joint_states(movements, default_time=3.0, start_time=None):
 
 def tprint(movements):
     for move in movements:
-        print "%0.4f"%move['time'] , 
-        for arm in ['l', 'r']:
-            if arm in move:
-                j = ["%.3f"%x for x in move[arm] ]
-                print "%s: [%s]"%(arm,",".join(j)),
+        print "%0.4f"% get_time(move) , 
+        PRESET = [LEFT, RIGHT, HEAD, BODY]
+        for key in PRESET:
+            if key in move:
+                j = ["%.3f"%x for x in move[key] ]
+                print "%s: [%s]"%(key,",".join(j)),
         for x,a in move.iteritems():
-            if x not in ['l', 'r', 'time']:
+            if x not in PRESET + [TIME]:
                 print "%s: %s"%(x,str(a)),
         print 

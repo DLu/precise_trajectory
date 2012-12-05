@@ -9,10 +9,10 @@ HEAD_JOINTS = ['head_pan_joint', 'head_tilt_joint']
 
 class HeadController:
     def __init__(self):
-        self.arm = SimpleActionClient('/head_traj_controller/joint_trajectory_action', JointTrajectoryAction)
+        self.client = SimpleActionClient('/head_traj_controller/joint_trajectory_action', JointTrajectoryAction)
         #wait for the action servers to come up 
         rospy.loginfo("[HEAD] Waiting for controller")
-        self.arm.wait_for_server()
+        self.client.wait_for_server()
         rospy.loginfo("[HEAD] Got controller")
 
     def start_trajectory(self, trajectory, set_time_stamp=True, wait=True):
@@ -21,14 +21,14 @@ class HeadController:
         goal.trajectory = trajectory
         if set_time_stamp:
             goal.trajectory.header.stamp = rospy.Time.now()
-        self.arm.send_goal(goal)
+        self.client.send_goal(goal)
 
         if wait:
             self.wait()
 
     def wait(self):
-        self.arm.wait_for_result()
+        self.client.wait_for_result()
 
     def is_done(self):
-        return self.arm.get_state() > SimpleGoalState.ACTIVE
+        return self.client.get_state() > SimpleGoalState.ACTIVE
 

@@ -1,5 +1,6 @@
 import roslib; roslib.load_manifest('pr2_precise_trajectory')
 import rospy
+from pr2_precise_trajectory import *
 from pr2_controllers_msgs.msg import *
 from actionlib import SimpleActionClient
 
@@ -7,7 +8,7 @@ OPEN = 0.09
 CLOSED = 0.002
 
 class GripperController:
-    def __init__(self, arms=['l', 'r']):
+    def __init__(self, arms=[LEFT, RIGHT]):
         self.effort = -1.0
         self.grippers = {}
         for arm in arms:
