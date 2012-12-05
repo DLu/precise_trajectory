@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_sith')
 import rospy
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller, OPEN, CLOSED
 import sys
 import yaml
@@ -14,19 +15,19 @@ class Duel:
     def __init__(self):
         self.forward_time = 1.9
         self.back_time = 0.8
-        self.controller = FullPr2Controller(['r'])
+        self.controller = FullPr2Controller([RIGHT])
         self.srv = Server(TheForceConfig, self.callback)
 
     def move_arm(self, move):
-        move[0]['time'] = self.forward_time
-        move[1]['time'] = self.back_time
+        move[0][TIME] = self.forward_time
+        move[1][TIME] = self.back_time
         self.controller.do_action(move)
 
     def setup(self, start):
         self.controller.do_action(start)
-        self.controller.grippers.change_position(['r'], OPEN)
+        self.controller.grippers.change_position([RIGHT], OPEN)
         raw_input('Press enter to close grip\n')
-        self.controller.grippers.change_position(['r'], CLOSED)
+        self.controller.grippers.change_position([RIGHT], CLOSED)
 
     def callback(self, config, level):
         self.forward_time = config.forward_time
