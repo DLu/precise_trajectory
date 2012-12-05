@@ -25,7 +25,7 @@ def transition_split(movements):
     
 
 class FullPr2Controller:
-    def __init__(self, keys=[LEFT, RIGHT, HEAD, BASE]):
+    def __init__(self, keys=[LEFT, RIGHT, HEAD, BASE], impact=True):
         self.keys = keys
         self.arms = {}
 
@@ -39,10 +39,10 @@ class FullPr2Controller:
         self.grippers = GripperController(self.arms.keys())
         self.base = BaseController() if BASE in keys else None
         self.head = HeadController() if HEAD in keys else None
-        self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in self.arms.keys()])
+        self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in self.arms.keys()]) if impact else None
         self.joint_watcher = JointWatcher(joint_names)
 
-    def do_action(self, movements): #TODO Add Base, Head, Gripper
+    def do_action(self, movements): #TODO Add Gripper
         if len(movements)==0:
             return
 

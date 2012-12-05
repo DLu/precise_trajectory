@@ -4,7 +4,7 @@ import tf
 import actionlib
 from  geometry_msgs.msg import Twist, PoseStamped
 from tf.transformations import euler_from_quaternion
-from pr2_pose_morph.msg import *
+from pr2_precise_trajectory.msg import *
 from math import copysign
 
 def orientation_to_euler(orientation):
