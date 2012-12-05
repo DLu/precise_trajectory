@@ -46,6 +46,8 @@ def graph_trajectory(trajectory, gtype="o-", prefix_filter=None, label_prefix=No
             label = "%s %s"%(label_prefix, name)
         p, = ax.plot(t,y, gtype, label=label, **keywords)
         plots[name] = p
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     return ax, plots
 
 def update_graph(trajectory, ax, plots):
@@ -64,9 +66,9 @@ def update_graph(trajectory, ax, plots):
     ax.set_xlim([min_t*.9, max_t*1.1])
     draw()
 
-def show_graph(loc=None, block=True):
-    if loc is not None:
-        legend(loc=loc)
+def show_graph(draw_legend=True, block=True):
+    if draw_legend:
+        legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
     grid(True)
     title('Trajectories')
     if block:
