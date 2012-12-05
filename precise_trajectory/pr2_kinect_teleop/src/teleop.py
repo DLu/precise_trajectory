@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_kinect_teleop')
 import rospy
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import ArmController, get_arm_joint_names
 from pr2_precise_trajectory.converter import simple_to_message_single
 from sensor_msgs.msg import JointState
@@ -13,7 +14,7 @@ from pr2_controllers_msgs.msg import JointTrajectoryAction, JointTrajectoryGoal
 VELOCITY_WINDOW = 5
 
 class ArmJoint:
-    def __init__(self, arms=['l', 'r']):
+    def __init__(self, arms=[LEFT, RIGHT]):
         rospy.init_node('pr2_kinect_teleop')
         self.arms = {}        
         self.joint_histories = {}
