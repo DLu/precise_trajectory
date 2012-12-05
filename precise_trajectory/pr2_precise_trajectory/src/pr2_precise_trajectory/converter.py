@@ -2,6 +2,7 @@ import roslib; roslib.load_manifest('pr2_precise_trajectory')
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.head_controller import HEAD_JOINTS
+from pr2_precise_trajectory.msg import *
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import pickle
