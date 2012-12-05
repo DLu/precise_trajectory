@@ -1,6 +1,7 @@
 from pylab import *
 import math
 import collections
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 ion()
 def normalize(angle):
@@ -14,8 +15,8 @@ def get_graph_data(trajectory):
     
     t0 = 0.0
     for move in trajectory:
-        t0 += move.get('time', 1.0)
-        for arm in ['l', 'r']:
+        t0 += get_time( move )
+        for arm in [LEFT, RIGHT]:
             if arm in move:
                 times[arm].append(t0)
                 positions[arm].append( move[arm] )
