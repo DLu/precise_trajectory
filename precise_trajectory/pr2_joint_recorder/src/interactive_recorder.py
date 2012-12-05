@@ -4,6 +4,7 @@ import rospy
 import sys
 import yaml
 import os.path
+import thread
 from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
@@ -12,6 +13,7 @@ from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.joint_watcher import JointWatcher
 from pr2_precise_trajectory.converter import *
 from pr2_mechanism_msgs.srv import SwitchController
+from graph_trajectory import *
 
 MANNEQUIN_CONTROLLER = '%s_arm_controller_loose'
 POSITION_CONTROLLER = '%s_arm_controller'
@@ -21,6 +23,7 @@ BUTTON_LAG = 1.0
 class InteractiveRecorder:
     def __init__(self, arms, filename):
         rospy.init_node('interactive_recorder')
+        self.running = True
         self.time = None
         self.filename = filename
         self.arms = arms
@@ -38,7 +41,7 @@ class InteractiveRecorder:
         else:
             self.movements = []
 
-        self.controller = FullPr2Controller(arms=arms)
+        self.controller = FullPr2Controller(keys=arms, impact=False)
         rospy.loginfo("Waiting for control manager")
         rospy.wait_for_service('pr2_controller_manager/switch_controller')
         rospy.loginfo("Got control manager!")
@@ -180,7 +183,16 @@ class InteractiveRecorder:
                 self.movements[self.mi][TIME] = t
             except ValueError:
                 self.movements[self.mi]['label'] = s
-                
+        self.running = False
+
+    def graph(self):
+        r = rospy.Rate(4)
+        self.ax, self.x = graph_trajectory(self.movements, 'o-')
+        show_graph(block=False)
+        
+        while self.running and not rospy.is_shutdown():
+            update_graph(self.movements, self.ax, self.x)
+            r.sleep()
 
 if __name__ == '__main__':
     if len(sys.argv)==1:
@@ -198,5 +210,7 @@ if __name__ == '__main__':
         exit(1)
 
     ir = InteractiveRecorder(arms, filename)
-    ir.spin()
+    #thread.start_new_thread(ir.graph, ())
+   # ir.spin()
+    ir.graph()
 
