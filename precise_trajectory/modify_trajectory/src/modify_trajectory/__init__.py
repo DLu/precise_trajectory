@@ -1,16 +1,17 @@
 import math
+from pr2_precise_trajectory import *
 
-def modify_linearize(trajectory, resolution=.1, arms=['l', 'r']):
+def modify_linearize(trajectory, resolution=.1, arms=[LEFT, RIGHT]):
     last_pt = trajectory[0] 
     new_trajectory = [ last_pt ]
     
     for move in trajectory[1:]:
-        time = move.get('time', 3.0)
+        time = get_time( move )
         num_points = int(math.floor(time / resolution))
 
         for a in range(num_points):
             frac = (a+1)*resolution / time
-            np = {'time': resolution}
+            np = {TIME: resolution}
             for arm in arms:
                 opos = last_pt[arm]
                 pos = move[arm]
@@ -18,7 +19,7 @@ def modify_linearize(trajectory, resolution=.1, arms=['l', 'r']):
                 np[arm] = npos
             new_trajectory.append(np)
 
-        move['time'] = time - num_points * resolution
+        move[TIME] = time - num_points * resolution
         new_trajectory.append(move)
         last_pt = move
 
@@ -43,7 +44,7 @@ def moving_average( data, W=1, B=2 ):
         avg.append(x)
     return avg
 
-def modify_moving_average(trajectory, arms=['l', 'r']):
+def modify_moving_average(trajectory, arms=[LEFT, RIGHT]):
     new_trajectory = []
     for tmove in trajectory:
         m = {}
@@ -65,7 +66,7 @@ def modify_moving_average(trajectory, arms=['l', 'r']):
                 new_trajectory[t][arm].append(nv)
     return new_trajectory
 
-def modify_kalman(trajectory, arms=['l', 'r'], Q=0.0008, R=0.0025, P=0.001):
+def modify_kalman(trajectory, arms=[LEFT, RIGHT], Q=0.0008, R=0.0025, P=0.001):
     new_trajectory = []
     p = {}
     x = {}
