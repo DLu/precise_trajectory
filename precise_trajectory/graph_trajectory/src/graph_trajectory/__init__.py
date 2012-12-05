@@ -7,9 +7,48 @@ ion()
 def normalize(angle):
     return angle - 2 * math.pi * math.floor((angle+math.pi)/(2*math.pi))
 
+THE_GRAPH = None
+
+class Grapher:
+    def __init__(self):
+        self.plots = {}
+        self.fig = figure(1)
+        self.ax = self.fig.add_subplot(111)
+        box = self.ax.get_position()
+        self.ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        draw()
+
+    def graph(self, trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
+        data = get_graph_data(trajectory)
+        for (name, t, y) in data:
+            if name in self.plots:
+                plot = self.plots[name]
+                plot.set_xdata(t)
+                plot.set_ydata(y)
+            else:
+                if prefix_filter is not None:
+                    if name.find(prefix_filter)!=0:
+                        continue
+                if label_prefix is None:
+                    label = name
+                else:
+                    label = "%s %s"%(label_prefix, name)
+                p, = self.ax.plot(t,y, gtype, label=label, **keywords)
+                self.plots[name] = p
+
+    def show(self, block):
+        self.ax.relim()
+        self.ax.autoscale_view(False,True,True)
+        legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        grid(True)
+        title('Trajectories')
+        if block:
+            show()
+        else:
+            draw()
+
 def get_graph_data(trajectory):
     data = []
-
     times = collections.defaultdict(list)
     positions = collections.defaultdict(list)
     
@@ -32,47 +71,12 @@ def get_graph_data(trajectory):
     return data
 
 def graph_trajectory(trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
-    fig = figure(1)
-    ax = fig.add_subplot(111)
-    plots = {}
-    data = get_graph_data(trajectory)
-    for (name, t, y) in data:
-        if prefix_filter is not None:
-            if name.find(prefix_filter)!=0:
-                continue
-        if label_prefix is None:
-            label = name
-        else:
-            label = "%s %s"%(label_prefix, name)
-        p, = ax.plot(t,y, gtype, label=label, **keywords)
-        plots[name] = p
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-    return ax, plots
+    global THE_GRAPH
+    if THE_GRAPH is None:
+        THE_GRAPH = Grapher()
+    THE_GRAPH.graph(trajectory, **keywords)
 
-def update_graph(trajectory, ax, plots):
-    data = get_graph_data(trajectory)
-    min_t = 1E9
-    max_t = -1
-    for (name, t, y) in data:
-        if name not in plots:
-            return
-        plot = plots[name]
-        plot.set_xdata(t)
-        plot.set_ydata(y)
-        min_t = min(min_t, t[0])
-        max_t = max(max_t, t[-1])
-
-    ax.set_xlim([min_t*.9, max_t*1.1])
-    draw()
-
-def show_graph(draw_legend=True, block=True):
-    if draw_legend:
-        legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    grid(True)
-    title('Trajectories')
-    if block:
-        show()
-    else:
-        draw()
+def show_graph(block=True):
+    global THE_GRAPH
+    THE_GRAPH.show(block)
 

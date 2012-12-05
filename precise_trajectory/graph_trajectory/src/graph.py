@@ -21,5 +21,5 @@ if __name__ == '__main__':
         fn = os.path.basename(arg).split('.')[0]
         graph_trajectory(trajectory, 'o-', prefix_filter='r_',  label_prefix=fn, linewidth=width, markersize=ms)
 
-    show_graph(loc=9)
+    show_graph(True)
 
