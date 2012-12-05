@@ -6,6 +6,7 @@ import yaml
 import os.path
 from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.joint_watcher import JointWatcher
@@ -16,7 +17,6 @@ MANNEQUIN_CONTROLLER = '%s_arm_controller_loose'
 POSITION_CONTROLLER = '%s_arm_controller'
 
 BUTTON_LAG = 1.0
-DEFAULT_TIME = 3.0
 
 class InteractiveRecorder:
     def __init__(self, arms, filename):
@@ -79,9 +79,9 @@ class InteractiveRecorder:
             m[arm] = self.jwatcher.get_positions( get_arm_joint_names(arm) )
 
         if insert and index < len(self.movements):
-            t = self.movements[index].get('time', DEFAULT_TIME)
-            m['time'] = t / 2
-            self.movements[index]['time'] = t / 2
+            t = get_time( self.movements[index] )
+            m[TIME] = t / 2
+            self.movements[index][TIME] = t / 2
 
         if insert:
             if index > len(self.movements):
@@ -98,9 +98,9 @@ class InteractiveRecorder:
             self.movements = self.movements[:self.mi]
             self.mi -= 1
         else:
-            t = self.movements[self.mi].get('time', DEFAULT_TIME)
-            t2 = self.movements[self.mi+1].get('time', DEFAULT_TIME)
-            self.movements[self.mi+1]['time'] = t + t2
+            t =  get_time( self.movements[self.mi]   )
+            t2 = get_time( self.movements[self.mi+1] )
+            self.movements[self.mi+1][TIME] = t + t2
             self.movements = self.movements[:self.mi] + self.movements[self.mi+1:]
         self.goto(0)
 
@@ -120,10 +120,10 @@ class InteractiveRecorder:
         if self.mi >= len(self.movements):
             return
         m = self.movements[self.mi]
-        t = m.get('time', DEFAULT_TIME)
+        t = get_time( m )
         nt = t * factor
         print "%f ==> %f"%(t, nt)
-        m['time'] = nt
+        m[TIME] = nt
 
     def start_action(self, movements):
         self.switch_to(POSITION_CONTROLLER)
@@ -177,7 +177,7 @@ class InteractiveRecorder:
 
             try:
                 t = float(s)
-                self.movements[self.mi]['time'] = t
+                self.movements[self.mi][TIME] = t
             except ValueError:
                 self.movements[self.mi]['label'] = s
                 
@@ -190,9 +190,9 @@ if __name__ == '__main__':
 
     arms = []
     if '-l' in sys.argv:
-        arms.append('l')
+        arms.append(LEFT)
     if '-r' in sys.argv:
-        arms.append('r')
+        arms.append(RIGHT)
     if len(arms)==0:
         print "Must specify at least one arm"
         exit(1)
