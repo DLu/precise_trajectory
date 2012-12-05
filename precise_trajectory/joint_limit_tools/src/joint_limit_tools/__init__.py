@@ -2,6 +2,7 @@
 import roslib; roslib.load_manifest('joint_limit_tools')
 import rospy
 from urdf_python.urdf import *
+from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from arm_navigation_msgs.msg import JointLimits
 
@@ -31,7 +32,7 @@ def get_joint_limits(joints):
         x[joint] = get_joint_limit(joint, urdf)
     return x
 
-def calculate_relative_speed(trajectory, arms=['l', 'r']):
+def calculate_relative_speed(trajectory, arms=[LEFT, RIGHT]):
     names = {}
     all_names = []
     for arm in arms:
@@ -46,7 +47,7 @@ def calculate_relative_speed(trajectory, arms=['l', 'r']):
             prev = move
             continue
         m = {}
-        t = move.get('time', 3.0)
+        t = get_time( move )
         for arm in arms:
             for name, p1, p2 in zip(names[arm], prev[arm], move[arm]):
                 limit = limits[name]
