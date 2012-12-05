@@ -21,20 +21,21 @@ class Grapher:
     def graph(self, trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
         data = get_graph_data(trajectory)
         for (name, t, y) in data:
-            if name in self.plots:
-                plot = self.plots[name]
+            if prefix_filter is not None:
+                if name.find(prefix_filter)!=0:
+                    continue
+            if label_prefix is None:
+                label = name
+            else:
+                label = "%s %s"%(label_prefix, name)
+
+            if label in self.plots:
+                plot = self.plots[label]
                 plot.set_xdata(t)
                 plot.set_ydata(y)
             else:
-                if prefix_filter is not None:
-                    if name.find(prefix_filter)!=0:
-                        continue
-                if label_prefix is None:
-                    label = name
-                else:
-                    label = "%s %s"%(label_prefix, name)
                 p, = self.ax.plot(t,y, gtype, label=label, **keywords)
-                self.plots[name] = p
+                self.plots[label] = p
 
     def show(self, block):
         self.ax.relim()
