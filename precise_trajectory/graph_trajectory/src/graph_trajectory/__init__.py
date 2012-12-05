@@ -40,12 +40,12 @@ def graph_trajectory(trajectory, gtype="o-", prefix_filter=None, label_prefix=No
         if prefix_filter is not None:
             if name.find(prefix_filter)!=0:
                 continue
-            if label_prefix is None:
-                label = name
-            else:
-                label = "%s %s"%(label_prefix, name)
-            p, = ax.plot(t,y, gtype, label=label, **keywords)
-            plots[name] = p
+        if label_prefix is None:
+            label = name
+        else:
+            label = "%s %s"%(label_prefix, name)
+        p, = ax.plot(t,y, gtype, label=label, **keywords)
+        plots[name] = p
     return ax, plots
 
 def update_graph(trajectory, ax, plots):
