@@ -4,7 +4,6 @@ import rospy
 import sys
 import yaml
 import os.path
-import thread
 from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
@@ -28,13 +27,12 @@ class InteractiveRecorder:
         self.filename = filename
         self.arms = arms
         self.mi = 0
+        self.recorded = []
+        self.grapher = Grapher()
         
         self.controllers = {}
-        names = []
         for arm in self.arms:
             self.controllers[arm] = POSITION_CONTROLLER % arm
-            names += get_arm_joint_names(arm)
-        self.jwatcher = JointWatcher(names)
 
         if os.path.exists(self.filename):
             self.movements = load_trajectory(self.filename)
@@ -63,6 +61,9 @@ class InteractiveRecorder:
         self.joy[ PS3('r2') ] = lambda: self.change_time(1.5)
         self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
+
+        if len(self.movements) > 0:
+            self.goto(0)
 
     def save_as_current(self):
         self.save(self.mi)
@@ -136,7 +137,12 @@ class InteractiveRecorder:
     def play(self, starti=None):
         if starti is None:
             starti = self.mi
+        self.recorded = None
+        self.controller.joint_watcher.record()
+        t_off = self.total_time(starti-1)
+        print t_off, starti
         self.start_action( self.movements[starti:] )
+        self.recorded = self.controller.joint_watcher.stop(t_off)
         self.mi = len(self.movements)-1
 
     def goto(self, delta):
@@ -171,27 +177,28 @@ class InteractiveRecorder:
             self.controllers[arm] = cname
         self.switcher(start, stop, 1)
 
+    def total_time(self, i):
+        return sum(get_time(m) for m in self.movements[:i+1])
+
     def spin(self):
-        s = ''
-        while s != 'quit':
-            s = raw_input()
-            if len(s)==0:
-                continue
-
-            try:
-                t = float(s)
-                self.movements[self.mi][TIME] = t
-            except ValueError:
-                self.movements[self.mi]['label'] = s
-        self.running = False
-
-    def graph(self):
         r = rospy.Rate(4)
-        self.ax, self.x = graph_trajectory(self.movements, 'o-')
-        show_graph(block=False)
-        
+        while len(self.movements)==0:
+            r.sleep()
+        self.grapher.graph(self.movements, 'o-')
+        self.grapher.show(block=False)
+        t0 = None
+        hilite = None
         while self.running and not rospy.is_shutdown():
-            update_graph(self.movements, self.ax, self.x)
+            self.grapher.graph(self.movements)
+
+            t = self.total_time(self.mi)
+            if t != t0:
+                if hilite is not None:
+                    hilite.remove()
+                hilite = self.grapher.ax.axvspan(t-0.5, t+0.5, color='red', alpha=0.5)
+            if self.recorded is not None and len(self.recorded)>0:
+                self.grapher.graph(self.recorded, "-", label_prefix="REC", linewidth=5, alpha=0.5)
+            self.grapher.show(block=False)
             r.sleep()
 
 if __name__ == '__main__':
@@ -210,7 +217,5 @@ if __name__ == '__main__':
         exit(1)
 
     ir = InteractiveRecorder(arms, filename)
-    #thread.start_new_thread(ir.graph, ())
-   # ir.spin()
-    ir.graph()
+    ir.spin()
 
