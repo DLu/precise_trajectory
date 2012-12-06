@@ -36,18 +36,19 @@ class JointWatcher:
 
     def record(self):
         self.start_time = rospy.Time.now()
+        self.data = []
         self.done = False
     
-    def stop(self):
+    def stop(self, delay=0.0):
         self.done = True
         last = None
         for move in self.data:
             if last is None:
                 last = move[TIME]
-                move[TIME] = 0.0
+                move[TIME] = delay+ 0.0
             else:
                 temp = move[TIME]
-                move[TIME] = temp - last
+                move[TIME] = (temp - last).to_sec()
                 last = temp
-        reutn self.data
+        return self.data
 

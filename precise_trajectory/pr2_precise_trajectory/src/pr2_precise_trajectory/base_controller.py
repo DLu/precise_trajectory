@@ -50,7 +50,7 @@ class BaseController:
             goal_pose.pose = pose
 
             while rospy.Time.now() <= goal_time:
-                relative = self.tf.transformPose(self.footprint, goal_pose)
+                relative = self.tf.transformPose(self.frame, goal_pose)
                 dx = relative.pose.position.x
                 dy = relative.pose.position.y
                 rot = orientation_to_euler(relative.pose.orientation)
@@ -69,9 +69,9 @@ class BaseController:
 
                 if abs(cmd.linear.x) > self.tlim:
                     cmd.linear.x = copysign(self.tlim, cmd.linear.x)
-                if abs(cmd.linear.y) > tlim:
+                if abs(cmd.linear.y) > self.tlim:
                     cmd.linear.y = copysign(self.tlim, cmd.linear.y)
-                if abs(cmd.angular.z) > alim:
+                if abs(cmd.angular.z) > self.rlim:
                     cmd.angular.z = copysign(self.rlim, cmd.angular.z)
 
                 self.cmd_pub.publish(cmd)

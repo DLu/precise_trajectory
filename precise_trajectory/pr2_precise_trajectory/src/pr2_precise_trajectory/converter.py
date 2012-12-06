@@ -3,6 +3,8 @@ from pr2_precise_trajectory import *
 from pr2_precise_trajectory.arm_controller import get_arm_joint_names
 from pr2_precise_trajectory.head_controller import HEAD_JOINTS
 from pr2_precise_trajectory.msg import *
+from geometry_msgs.msg import Pose
+from tf.transformations import quaternion_from_euler
 from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 import pickle
@@ -46,13 +48,13 @@ def simple_to_message(movements, key):
         trajectory.points.append(pt)
     return trajectory
 
-def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
+def simple_to_move_sequence(movements, frame="/odom_combined", now=None, delay=0.0):
     nav_goal = MoveSequenceGoal()
     nav_goal.header.frame_id = frame
     for move in precise_subset(movements, BASE):
         t = get_time(move)
         pose = move[BASE]
-        nav_goal.times.append(t-J)
+        nav_goal.times.append(t-delay)
         p = Pose()
         p.position.x = pose[0]
         p.position.y = pose[1]
