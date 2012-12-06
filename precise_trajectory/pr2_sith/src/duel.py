@@ -2,7 +2,7 @@
 import roslib; roslib.load_manifest('pr2_sith')
 import rospy
 from pr2_precise_trajectory import *
-from pr2_precise_trajectory.full_controller import FullPr2Controller
+from pr2_precise_trajectory.full_controller import FullPr2Controller, OPEN, CLOSED
 import sys
 import yaml
 import random
@@ -25,9 +25,9 @@ class Duel:
 
     def setup(self, start):
         self.controller.do_action(start)
-        self.controller.hands[RIGHT_HAND].change_position(1.0)
+        self.controller.hands[RIGHT_HAND].change_position(OPEN)
         raw_input('Press enter to close grip\n')
-        self.controller.hands[RIGHT_HAND].change_position(0.0)
+        self.controller.hands[RIGHT_HAND].change_position(CLOSED)
 
     def callback(self, config, level):
         self.forward_time = config.forward_time
