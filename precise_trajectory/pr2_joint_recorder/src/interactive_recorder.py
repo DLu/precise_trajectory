@@ -8,52 +8,54 @@ from joy_listener import JoyListener, PS3
 from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
-from pr2_precise_trajectory.arm_controller import get_arm_joint_names
-from pr2_precise_trajectory.joint_watcher import JointWatcher
 from pr2_precise_trajectory.converter import *
 from pr2_mechanism_msgs.srv import SwitchController
 from graph_trajectory import *
+import argparse
 
-MANNEQUIN_CONTROLLER = '%s_arm_controller_loose'
-POSITION_CONTROLLER = '%s_arm_controller'
+MANNEQUIN_CONTROLLERS = {LEFT: 'l_arm_controller_loose', RIGHT: 'r_arm_controller_loose', HEAD: 'head_traj_controller_loose'}
+POSITION_CONTROLLERS = {LEFT: 'l_arm_controller', RIGHT: 'r_arm_controller', HEAD: 'head_traj_controller'}
 
 BUTTON_LAG = 1.0
+ALL = 'all'
 
 class InteractiveRecorder:
-    def __init__(self, arms, filename):
+    def __init__(self, keys, filename, impact=False):
         rospy.init_node('interactive_recorder')
-        self.running = True
         self.time = None
         self.filename = filename
-        self.arms = arms
+        self.keys = [ALL] + keys
+        self.key_i = 0
+        self.change_mode(0)
         self.mi = 0
         self.recorded = []
         self.grapher = Grapher()
         
         self.controllers = {}
-        for arm in self.arms:
-            self.controllers[arm] = POSITION_CONTROLLER % arm
+        for key in self.keys:
+            if key in POSITION_CONTROLLERS:
+                self.controllers[key] = POSITION_CONTROLLERS[key]
 
         if os.path.exists(self.filename):
             self.movements = load_trajectory(self.filename)
         else:
             self.movements = []
 
-        self.controller = FullPr2Controller(keys=arms, impact=False)
+        self.controller = FullPr2Controller(keys=keys, impact=impact)
         rospy.loginfo("Waiting for control manager")
         rospy.wait_for_service('pr2_controller_manager/switch_controller')
         rospy.loginfo("Got control manager!")
         self.switcher = rospy.ServiceProxy('pr2_controller_manager/switch_controller', SwitchController)
 
-        self.switch_to(MANNEQUIN_CONTROLLER)
-
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
         self.joy[ PS3('circle') ] = self.save_as_next 
         self.joy[ PS3('triangle') ] = self.delete
-        self.joy[ PS3('square') ] = self.set_impact
+        self.joy[ PS3('square') ] = self.set_property
         self.joy[ PS3('right') ] = lambda: self.goto(1)
         self.joy[ PS3('left') ] = lambda: self.goto(-1)
+        self.joy[ PS3('up') ] = lambda: self.change_mode(-1)
+        self.joy[ PS3('down') ] = lambda: self.change_mode(1)
         self.joy[ PS3('select') ] = self.play # play from here
         self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
         self.joy[ PS3('ps3') ] = self.to_file
@@ -79,8 +81,13 @@ class InteractiveRecorder:
         else:
             m = {}
 
-        for arm in self.arms:
-            m[arm] = self.jwatcher.get_positions( get_arm_joint_names(arm) )
+        mode = self.keys[self.key_i]
+        if mode==ALL:
+            mode = self.keys[1:]
+        else:
+            mode = [mode]
+        for key in mode:
+            m[key] = self.jwatcher.get_positions( key )
 
         if insert and index < len(self.movements):
             t = get_time( self.movements[index] )
@@ -108,17 +115,23 @@ class InteractiveRecorder:
             self.movements = self.movements[:self.mi] + self.movements[self.mi+1:]
         self.goto(0)
 
-    def set_impact(self):
+    def set_property(self):
         if self.mi >= len(self.movements):
             return
 
+        field = raw_input("Field: ")
+        value = raw_input("Value: ")
+
         m = self.movements[self.mi]
+
+        """
         if 'transition' not in m or m['transition'] == 'wait':
             m['transition'] = 'impact'
         else:
             m['transition'] = 'wait'
 
-        print m['transition']
+        print m['transition']"""
+        m[field] = value
 
     def change_time(self, factor):
         if self.mi >= len(self.movements):
@@ -130,9 +143,9 @@ class InteractiveRecorder:
         m[TIME] = nt
 
     def start_action(self, movements):
-        self.switch_to(POSITION_CONTROLLER)
+        self.switch_to(POSITION_CONTROLLERS)
         self.controller.do_action(movements)
-        self.switch_to(MANNEQUIN_CONTROLLER)
+        self.switch_to(MANNEQUIN_CONTROLLERS)
 
     def play(self, starti=None):
         if starti is None:
@@ -140,7 +153,6 @@ class InteractiveRecorder:
         self.recorded = None
         self.controller.joint_watcher.record()
         t_off = self.total_time(starti-1)
-        print t_off, starti
         self.start_action( self.movements[starti:] )
         self.recorded = self.controller.joint_watcher.stop(t_off)
         self.mi = len(self.movements)-1
@@ -152,29 +164,30 @@ class InteractiveRecorder:
 
         m = self.movements[ni]
         m2 = {}
-        for arm in self.arms:
-            m2[arm] = m[arm]
+        for key in self.keys:
+            m2[key] = m[key]
         self.start_action( [m2] )
         self.mi = ni
-        print self.mi, self.movements[self.mi]
+
+    def change_mode(self, delta):
+        self.key_i += delta 
+        self.key_i = self.key_i % len(self.keys)
+        rospy.loginfo("Current Mode: %s"%self.keys[self.key_i])
 
     def to_file(self):
-        x = yaml.dump(self.movements)
-        print x
+        print yaml.dump(self.movements)
         print
-        f = open(self.filename, 'w')
-        f.write(x)
-        f.close()
+        save_trajectory(self.movements, self.filename)
 
-    def switch_to(self, newname):
+    def switch_to(self, controller_map):
         start = []
         stop = []
-        for arm in self.arms:
-            cname = newname % arm
+        for key in self.controllers:
+            cname = controller_map[key]
             rospy.loginfo("Switching to %s"%cname)
-            stop.append( self.controllers[arm] ) 
+            stop.append( self.controllers[key] ) 
             start.append( cname ) 
-            self.controllers[arm] = cname
+            self.controllers[key] = cname
         self.switcher(start, stop, 1)
 
     def total_time(self, i):
@@ -188,7 +201,7 @@ class InteractiveRecorder:
         self.grapher.show(block=False)
         t0 = None
         hilite = None
-        while self.running and not rospy.is_shutdown():
+        while not rospy.is_shutdown():
             self.grapher.graph(self.movements)
 
             t = self.total_time(self.mi)
@@ -202,20 +215,25 @@ class InteractiveRecorder:
             r.sleep()
 
 if __name__ == '__main__':
-    if len(sys.argv)==1:
-        print "Need to specify filename"
-        exit(1)
-    filename = sys.argv[1]
+    parser = argparse.ArgumentParser(description='Interactive Motion Recorder')
+    parser.add_argument('filename')
+    parser.add_argument('-l', dest='keys', action='append_const', const=LEFT)
+    parser.add_argument('-r', dest='keys', action='append_const', const=RIGHT)
+    parser.add_argument('-b', dest='keys', action='append_const', const=BASE)
+    parser.add_argument('-p', '--head', dest='keys', action='append_const', const=HEAD)
+    parser.add_argument('-lh', dest='keys', action='append_const', const=LEFT_HAND)
+    parser.add_argument('-rh', dest='keys', action='append_const', const=RIGHT_HAND)
+    parser.add_argument('-a', '--all', action='store_true', dest='all')
+    parser.add_argument('-i', '--impact', action='store_true', dest='impact')
 
-    arms = []
-    if '-l' in sys.argv:
-        arms.append(LEFT)
-    if '-r' in sys.argv:
-        arms.append(RIGHT)
-    if len(arms)==0:
-        print "Must specify at least one arm"
+    args = parser.parse_args()
+    if args.all:
+        args.keys = [LEFT, RIGHT, BASE, HEAD, LEFT_HAND, RIGHT_HAND]
+
+    if args.keys is None or len(args.keys)==0:
+        print "Must specify at least one part"
         exit(1)
 
-    ir = InteractiveRecorder(arms, filename)
+    ir = InteractiveRecorder(args.keys, args.filename, args.impact)
     ir.spin()
 
