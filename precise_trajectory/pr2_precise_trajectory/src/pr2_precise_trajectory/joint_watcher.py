@@ -2,6 +2,7 @@ import roslib; roslib.load_manifest('pr2_precise_trajectory')
 from pr2_precise_trajectory import *
 import rospy
 from sensor_msgs.msg import JointState
+from tf.transformations import euler_from_quaternion
 
 class JointWatcher:
     def __init__(self, name_map):
@@ -16,7 +17,15 @@ class JointWatcher:
         self.start_time = None
         self.done = False
 
+        self.tf = None
+        self.frame = None
+
         self.joint_sub = rospy.Subscriber('/joint_states', JointState, self.joint_cb)        
+
+    def add_tf(self, tf, frame='/odom_combined'):
+        self.tf = tf
+        self.frame = frame
+        self.key_map[BASE] = ['x', 'y', 'theta']
 
     def joint_cb(self, msg):
         self.state = {}
@@ -26,6 +35,12 @@ class JointWatcher:
                 i = msg.name.index(name) 
                 pos.append( msg.position[i] )
             self.state[key] = pos
+
+        if BASE in self.key_map:
+            (trans,rot) = listener.lookupTransform('/base_footprint', self.frame, rospy.Time(0))
+            euler = euler_from_quaternion(rot)
+            self.state[BASE] = [trans[0], trans[1], euler[2]]
+
         self.state[TIME] = msg.header.stamp
 
         if self.start_time is not None and not self.done:

@@ -72,10 +72,10 @@ def simple_to_move_sequence(movements, frame="/odom_combined", now=None, delay=0
 def simple_to_gripper_sequence(movements, hand, now=None):
     goal = GripperSequenceGoal()
     for move in precise_subset(movements, hand):
-        ratio = move[hand]
+        position = move[hand]
         t = get_time(move)
         goal.times.append(t)
-        goal.ratios.append(ratio)
+        goal.positions.append(position)
     if now is None:
         now = rospy.Time.now()
     goal.header.stamp = now

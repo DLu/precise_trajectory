@@ -42,11 +42,22 @@ class FullPr2Controller:
             if hand not in keys:
                 continue
             self.hands[hand] = GripperController(hand)
+            joint_map[hand] = ['%s_gripper_joint'%hand[0]]
 
-        self.base = BaseController() if BASE in keys else None
-        self.head = HeadController() if HEAD in keys else None
+        if HEAD in keys:
+            self.head = HeadController() 
+            joint_map[HEAD] = ['head_pan_joint', 'head_tilt_joint']
+        else:
+            self.head = None
+
         self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in self.arms.keys()]) if impact else None
         self.joint_watcher = JointWatcher(joint_map)
+
+        if BASE in keys:
+            self.base = BaseController()
+            self.joint_watcher.add_tf(base.tf)
+        else:
+            self.base = None
 
     def do_action(self, movements):
         if len(movements)==0:
