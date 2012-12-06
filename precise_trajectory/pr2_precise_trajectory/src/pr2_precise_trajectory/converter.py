@@ -69,6 +69,18 @@ def simple_to_move_sequence(movements, frame="/odom_combined", now=None, delay=0
     nav_goal.header.stamp = now + rospy.Duration(delay)
     return nav_goal
 
+def simple_to_gripper_sequence(movements, hand, now=None):
+    goal = GripperSequenceGoal()
+    for move in precise_subset(movements, hand):
+        ratio = move[hand]
+        t = get_time(move)
+        goal.times.append(t)
+        goal.ratios.append(ratio)
+    if now is None:
+        now = rospy.Time.now()
+    goal.header.stamp = now
+    return goal
+
 
 def trajectory_to_simple(trajectory, fill_missing_with_zeros=True):
     indexes = {}

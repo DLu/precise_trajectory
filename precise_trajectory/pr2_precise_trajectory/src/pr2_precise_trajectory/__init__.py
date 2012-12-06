@@ -4,6 +4,8 @@ LEFT = 'l'
 RIGHT = 'r'
 BASE = 'b'
 TIME = 't'
+LEFT_HAND = 'lh'
+RIGHT_HAND = 'rh'
 
 DEFAULT_TIME = 3.0
 

@@ -26,7 +26,7 @@ def transition_split(movements):
     
 
 class FullPr2Controller:
-    def __init__(self, keys=[LEFT, RIGHT, HEAD, BASE], impact=True):
+    def __init__(self, keys=[LEFT, RIGHT, HEAD, BASE, LEFT_HAND, RIGHT_HAND], impact=True):
         self.keys = keys
         self.arms = {}
 
@@ -37,13 +37,18 @@ class FullPr2Controller:
             self.arms[arm] = ArmController(arm)
             joint_map[arm] = get_arm_joint_names(arm)
 
-        self.grippers = GripperController(self.arms.keys())
+        self.hands = {}
+        for hand in [LEFT_HAND, RIGHT_HAND]:
+            if hand not in keys:
+                continue
+            self.hands[hand] = GripperController(hand)
+
         self.base = BaseController() if BASE in keys else None
         self.head = HeadController() if HEAD in keys else None
         self.impacts = ImpactWatcher(['%s_gripper_sensor_controller'%arm for arm in self.arms.keys()]) if impact else None
         self.joint_watcher = JointWatcher(joint_map)
 
-    def do_action(self, movements): #TODO Add Gripper
+    def do_action(self, movements):
         if len(movements)==0:
             return
 
@@ -57,6 +62,10 @@ class FullPr2Controller:
                     seq = simple_to_move_sequence(sub)
                     self.base.send_goal(seq)
                     clients.append(self.base.client)
+                elif key==LEFT_HAND or key==RIGHT_HAND:
+                    seq = simple_to_gripper_sequence(sub)
+                    self.hand[key].send_goal(seq)
+                    clients.append(self.hand[key].client)
                 else:
                     traj = simple_to_message(sub, key)
                     if key in self.arms:
