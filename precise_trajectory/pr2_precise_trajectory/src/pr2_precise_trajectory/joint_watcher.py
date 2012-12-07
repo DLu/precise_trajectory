@@ -46,6 +46,9 @@ class JointWatcher:
         if self.start_time is not None and not self.done:
             self.data.append(self.state)
 
+    def get_positions(self, key):
+        return self.state[key]
+
     def get_state(self):
         return self.state
 

@@ -69,6 +69,8 @@ class FullPr2Controller:
             clients = []
             for key in self.keys:
                 sub = precise_subset(ms, key)
+                if len(sub)==0:
+                    continue
                 if key==BASE:
                     seq = simple_to_move_sequence(sub)
                     self.base.send_goal(seq)
