@@ -198,12 +198,17 @@ class InteractiveRecorder:
 
     def toggle_teleop(self):
         if self.joy.axes_cb is None:
+            rospy.loginfo("Teleop ON")
             self.joy.axes_cb = self.drive
         else:
+            rospy.loginfo("Teleop OFF")
             self.joy.axes_cb = None
 
     def drive(self, axes):
-        print axes[0:4]
+        z = axes[0]
+        x = axes[3]
+        y = axes[2]
+        self.controller.base.publish_command(.6*x, .6*y, .8*z)
 
     def total_time(self, i):
         return sum(get_time(m) for m in self.movements[:i+1])

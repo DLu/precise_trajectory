@@ -60,7 +60,7 @@ class BaseController:
                 if t < .1:
                     t = 1.0
 
-                self.publish_command( dx / t, dy / y, dz / t )
+                self.publish_command( dx / t, dy / t, dz / t )
 
                 feedback.percent_complete = t / time
                 self.server.publish_feedback(feedback)
