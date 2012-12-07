@@ -55,7 +55,7 @@ class FullPr2Controller:
 
         if BASE in keys:
             self.base = BaseController()
-            self.joint_watcher.add_tf(base.tf)
+            self.joint_watcher.add_tf(self.base.tf)
         else:
             self.base = None
 
@@ -74,9 +74,9 @@ class FullPr2Controller:
                     self.base.send_goal(seq)
                     clients.append(self.base.client)
                 elif key==LEFT_HAND or key==RIGHT_HAND:
-                    seq = simple_to_gripper_sequence(sub)
-                    self.hand[key].send_goal(seq)
-                    clients.append(self.hand[key].client)
+                    seq = simple_to_gripper_sequence(sub, key)
+                    self.hands[key].send_goal(seq)
+                    clients.append(self.hands[key].client)
                 else:
                     traj = simple_to_message(sub, key)
                     if key in self.arms:

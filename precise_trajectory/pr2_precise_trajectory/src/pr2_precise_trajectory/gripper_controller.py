@@ -37,7 +37,7 @@ class GripperController:
         while rospy.Time.now() < goal.header.stamp:
             rate.sleep()
 
-        for position, time in goal.positions, goal.times:
+        for position, time in zip(goal.positions, goal.times):
             self.change_position(position, False)
             rospy.sleep( time ) 
         self.server.set_succeeded(GripperSequenceResult())

@@ -75,7 +75,7 @@ def simple_to_gripper_sequence(movements, hand, now=None):
         position = move[hand]
         t = get_time(move)
         goal.times.append(t)
-        goal.positions.append(position)
+        goal.positions += position
     if now is None:
         now = rospy.Time.now()
     goal.header.stamp = now

@@ -36,8 +36,8 @@ class JointWatcher:
                 pos.append( msg.position[i] )
             self.state[key] = pos
 
-        if BASE in self.key_map:
-            (trans,rot) = listener.lookupTransform('/base_footprint', self.frame, rospy.Time(0))
+        if BASE in self.key_map and self.tf:
+            (trans,rot) = self.tf.lookupTransform('/base_footprint', self.frame, rospy.Time(0))
             euler = euler_from_quaternion(rot)
             self.state[BASE] = [trans[0], trans[1], euler[2]]
 
