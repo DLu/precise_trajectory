@@ -65,6 +65,7 @@ class InteractiveRecorder:
         self.joy[ PS3('r2') ] = lambda: self.change_time(1.5)
         self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
+        self.joy[ PS3('left_joy') ] = self.toggle_teleop
 
         if len(self.movements) > 0:
             self.goto(0)
@@ -194,6 +195,15 @@ class InteractiveRecorder:
             start.append( cname ) 
             self.controllers[key] = cname
         self.switcher(start, stop, 1)
+
+    def toggle_teleop(self):
+        if self.joy.axes_cb is None:
+            self.joy.axes_cb = self.drive
+        else:
+            self.joy.axes_cb = None
+
+    def drive(self, axes):
+        print axes[0:4]
 
     def total_time(self, i):
         return sum(get_time(m) for m in self.movements[:i+1])
