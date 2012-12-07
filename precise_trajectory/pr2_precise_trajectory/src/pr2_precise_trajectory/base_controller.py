@@ -57,24 +57,11 @@ class BaseController:
                 dz = rot[2]
 
                 t = (goal_time - rospy.Time.now()).to_sec()
-
-                cmd = Twist()
                 if t < .1:
                     t = 1.0
-                cmd.linear.x = dx/t
-                cmd.linear.y = dy/t
-                cmd.angular.z = dz/t
 
-                alim = 1.4
+                self.publish_command( dx / t, dy / y, dz / t )
 
-                if abs(cmd.linear.x) > self.tlim:
-                    cmd.linear.x = copysign(self.tlim, cmd.linear.x)
-                if abs(cmd.linear.y) > self.tlim:
-                    cmd.linear.y = copysign(self.tlim, cmd.linear.y)
-                if abs(cmd.angular.z) > self.rlim:
-                    cmd.angular.z = copysign(self.rlim, cmd.angular.z)
-
-                self.cmd_pub.publish(cmd)
                 feedback.percent_complete = t / time
                 self.server.publish_feedback(feedback)
                 r.sleep()
@@ -82,7 +69,20 @@ class BaseController:
 
         self.server.set_succeeded(MoveSequenceResult())
 
+    def publish_command(self, dx, dy, dz):
+        cmd = Twist()
+        cmd.linear.x = dx
+        cmd.linear.y = dy
+        cmd.angular.z = dz
 
+        if abs(cmd.linear.x) > self.tlim:
+            cmd.linear.x = copysign(self.tlim, cmd.linear.x)
+        if abs(cmd.linear.y) > self.tlim:
+            cmd.linear.y = copysign(self.tlim, cmd.linear.y)
+        if abs(cmd.angular.z) > self.rlim:
+            cmd.angular.z = copysign(self.rlim, cmd.angular.z)
+
+        self.cmd_pub.publish(cmd)
 
 if __name__=='__main__':
     pm = PoseMorph()
