@@ -8,6 +8,7 @@ def normalize(angle):
     return angle - 2 * math.pi * math.floor((angle+math.pi)/(2*math.pi))
 
 THE_GRAPH = None
+FIELDS = [LEFT, RIGHT, BASE, LEFT_HAND, RIGHT_HAND, HEAD]
 
 class Grapher:
     def __init__(self):
@@ -56,14 +57,21 @@ def get_graph_data(trajectory):
     t0 = 0.0
     for move in trajectory:
         t0 += get_time( move )
-        for arm in [LEFT, RIGHT]:
-            if arm in move:
-                times[arm].append(t0)
-                positions[arm].append( move[arm] )
+        for key in FIELDS:
+            if key in move:
+                times[key].append(t0)
+                positions[key].append( move[key] )
 
-    for arm, t in times.iteritems():
-        names = get_arm_joint_names(arm)
-        pos = positions[arm]
+    for key, t in times.iteritems():
+        if key in [LEFT, RIGHT]:
+            names = get_arm_joint_names(key)
+        elif key==BASE:
+            names = ['x', 'y', 'theta']
+        elif key==HEAD:
+            names = ['pan', 'tilt']
+        else:
+            names = [key]
+        pos = positions[key]
         for (i, name) in enumerate(names):
             y = []
             for pt in pos:
