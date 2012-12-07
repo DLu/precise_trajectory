@@ -47,6 +47,8 @@ class InteractiveRecorder:
         rospy.loginfo("Got control manager!")
         self.switcher = rospy.ServiceProxy('pr2_controller_manager/switch_controller', SwitchController)
 
+        self.switch_to(MANNEQUIN_CONTROLLERS)
+
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
         self.joy[ PS3('circle') ] = self.save_as_next 
@@ -66,6 +68,8 @@ class InteractiveRecorder:
 
         if len(self.movements) > 0:
             self.goto(0)
+        else:
+            self.switch_to(MANNEQUIN_CONTROLLERS)
 
     def save_as_current(self):
         self.save(self.mi)
@@ -87,7 +91,7 @@ class InteractiveRecorder:
         else:
             mode = [mode]
         for key in mode:
-            m[key] = self.jwatcher.get_positions( key )
+            m[key] = self.controller.joint_watcher.get_positions( key )
 
         if insert and index < len(self.movements):
             t = get_time( self.movements[index] )
@@ -164,8 +168,9 @@ class InteractiveRecorder:
 
         m = self.movements[ni]
         m2 = {}
-        for key in self.keys:
-            m2[key] = m[key]
+        for key in self.keys[1:]:
+            if key in m:
+                m2[key] = m[key]
         self.start_action( [m2] )
         self.mi = ni
 
