@@ -43,14 +43,20 @@ class BaseController:
             r.sleep()
 
         feedback = MoveSequenceFeedback()
+        t_prev = goal.header.stamp
         for pose, time in zip(goal.poses, goal.times):
-            goal_time = goal.header.stamp + rospy.Duration(time)
+            goal_time = t_prev + rospy.Duration(time)
+            t_prev = goal_time
             goal_pose = PoseStamped()
             goal_pose.header.frame_id = goal.header.frame_id
             goal_pose.pose = pose
 
             while rospy.Time.now() <= goal_time:
-                relative = self.tf.transformPose(self.frame, goal_pose)
+                try:
+                    relative = self.tf.transformPose(self.frame, goal_pose)
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    continue
+
                 dx = relative.pose.position.x
                 dy = relative.pose.position.y
                 rot = orientation_to_euler(relative.pose.orientation)

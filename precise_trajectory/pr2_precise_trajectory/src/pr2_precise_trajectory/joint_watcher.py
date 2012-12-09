@@ -3,6 +3,7 @@ from pr2_precise_trajectory import *
 import rospy
 from sensor_msgs.msg import JointState
 from tf.transformations import euler_from_quaternion
+import tf
 
 class JointWatcher:
     def __init__(self, name_map):
@@ -22,7 +23,7 @@ class JointWatcher:
 
         self.joint_sub = rospy.Subscriber('/joint_states', JointState, self.joint_cb)        
 
-    def add_tf(self, tf, frame='/odom_combined'):
+    def add_tf(self, tf, frame='/map'):
         self.tf = tf
         self.frame = frame
         self.key_map[BASE] = ['x', 'y', 'theta']
@@ -37,9 +38,19 @@ class JointWatcher:
             self.state[key] = pos
 
         if BASE in self.key_map and self.tf:
-            (trans,rot) = self.tf.lookupTransform('/base_footprint', self.frame, rospy.Time(0))
-            euler = euler_from_quaternion(rot)
-            self.state[BASE] = [trans[0], trans[1], euler[2]]
+            attempts = 0
+            while attempts < 10:
+                try:
+                    (trans,rot) = self.tf.lookupTransform(self.frame, '/base_footprint', rospy.Time(0))
+                    break
+                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                    attempts += 1
+                    continue
+            if attempts < 10:
+                euler = euler_from_quaternion(rot)
+                self.state[BASE] = [trans[0], trans[1], euler[2]]
+            else:
+                rospy.logerr("TF ERROR!")
 
         self.state[TIME] = msg.header.stamp
 

@@ -48,7 +48,7 @@ def simple_to_message(movements, key):
         trajectory.points.append(pt)
     return trajectory
 
-def simple_to_move_sequence(movements, frame="/odom_combined", now=None, delay=0.0):
+def simple_to_move_sequence(movements, frame="/map", now=None, delay=0.0):
     nav_goal = MoveSequenceGoal()
     nav_goal.header.frame_id = frame
     for move in precise_subset(movements, BASE):
