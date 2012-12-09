@@ -99,7 +99,7 @@ class FullPr2Controller:
 
     def stop_arm(self, time=0.1):
         for arm in self.arms:
-            trajectory = simple_to_message_single(self.joint_watcher.get_positions(get_arm_joint_names(arm)), time, arm)
+            trajectory = simple_to_message_single(self.joint_watcher.get_positions(arm), time, arm)
             self.arms[arm].start_trajectory(trajectory, wait=False)
         rospy.sleep(time)
 

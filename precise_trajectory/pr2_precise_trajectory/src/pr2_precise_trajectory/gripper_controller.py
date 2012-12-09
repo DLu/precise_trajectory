@@ -41,12 +41,16 @@ class GripperController:
             self.change_position(position, False)
             rospy.sleep( time ) 
         self.server.set_succeeded(GripperSequenceResult())
+        self.change_position(position, False, 0.0)
         
 
-    def change_position(self, position, should_wait=True):
+    def change_position(self, position, should_wait=True, effort=None):
+        if effort is None:
+            effort = self.effort
+
         gg = Pr2GripperCommandGoal()
         gg.command.position = position
-        gg.command.max_effort = self.effort
+        gg.command.max_effort = effort
         self.sub_client.send_goal(gg)
         if should_wait:
             self.sub_client.wait_for_result()
