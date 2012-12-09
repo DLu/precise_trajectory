@@ -15,4 +15,6 @@
 
   <include file="$(find pr2_sith)/duel_core.launch"/>
 
+  <arg name="nav" default="1"/>
+  <include file="$(find wu_pr2_2dnav)/custom_nav.launch" if="$(arg nav)"/>
 </launch>

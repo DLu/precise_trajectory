@@ -1,0 +1,5 @@
+<launch>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find acting_trajectories_2012)/map/nothing_map.yaml" />
+  <include file="$(find wu_pr2_2dnav)/base_nav.launch" />
+  <include file="$(find pr2_navigation_global)/move_base.xml"/>
+</launch>
