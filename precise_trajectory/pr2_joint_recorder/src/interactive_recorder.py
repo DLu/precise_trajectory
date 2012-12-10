@@ -138,14 +138,23 @@ class InteractiveRecorder:
         print m['transition']"""
         m[field] = value
 
-    def change_time(self, factor):
+    def change_time(self, factor, shift=True):
         if self.mi >= len(self.movements):
             return
         m = self.movements[self.mi]
         t = get_time( m )
         nt = t * factor
-        print "%f ==> %f"%(t, nt)
-        m[TIME] = nt
+        if shift and self.mi + 1 < len(self.movements):
+            m2 = self.movements[self.mi + 1]
+            ot = get_time( m2 )
+            dt = nt - t
+            if ot > dt:
+                m[TIME] = nt
+                m2[TIME] = ot - dt
+            else:
+                rospy.logerr("TIME TO SMALL")
+        else:
+            m[TIME] = nt
 
     def start_action(self, movements):
         self.switch_to(POSITION_CONTROLLERS)
