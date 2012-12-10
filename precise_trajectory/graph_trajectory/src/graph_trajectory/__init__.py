@@ -11,46 +11,61 @@ THE_GRAPH = None
 FIELDS = [LEFT, RIGHT, BASE, LEFT_HAND, RIGHT_HAND, HEAD]
 
 class Grapher:
-    def __init__(self):
+    def __init__(self, name=None, keys=[None]):
         self.plots = {}
-        self.fig = figure(1)
-        self.ax = self.fig.add_subplot(111)
-        box = self.ax.get_position()
-        self.ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        self.fig = figure(1, figsize=(18, 16))
+        self.fig.subplots_adjust(hspace=0)
+        if name is None:
+            name = "Trajectory Plotter"
+        self.fig.canvas.set_window_title(name) 
+
+        self.subplots = {}
+        n = len(keys)
+        for i, key in enumerate(sorted(keys)):
+            subplot = self.fig.add_subplot(n, 1, i+1)
+            box = subplot.get_position()
+            subplot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+            self.subplots[key] = subplot
+                
         draw()
 
-    def graph(self, trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
-        data = get_graph_data(trajectory)
-        for (name, t, y) in data:
-            if prefix_filter is not None:
-                if name.find(prefix_filter)!=0:
-                    continue
-            if label_prefix is None:
-                label = name
-            else:
-                label = "%s %s"%(label_prefix, name)
+    def get_subplot(self, key):
+        if key in self.subplots:
+            return self.subplots[key]
+        else:
+            return self.subplots[None]
 
-            if label in self.plots:
-                plot = self.plots[label]
-                plot.set_xdata(t)
-                plot.set_ydata(y)
-            else:
-                p, = self.ax.plot(t,y, gtype, label=label, **keywords)
-                self.plots[label] = p
+    def graph(self, trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
+        for key, data in get_graph_data(trajectory).iteritems():
+            for (name, t, y) in data:
+                if prefix_filter is not None:
+                    if name.find(prefix_filter)!=0:
+                        continue
+                if label_prefix is None:
+                    label = name
+                else:
+                    label = "%s %s"%(label_prefix, name)
+
+                if label in self.plots:
+                    plot = self.plots[label]
+                    plot.set_xdata(t)
+                    plot.set_ydata(y)
+                else:
+                    p, = self.get_subplot(key).plot(t,y, gtype, label=label, **keywords)
+                    self.plots[label] = p
 
     def show(self, block):
-        self.ax.relim()
-        self.ax.autoscale_view(False,True,True)
-        legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        grid(True)
-        title('Trajectories')
+        for subplot in self.subplots.values():
+            subplot.relim()
+            subplot.autoscale_view(False,True,True)
+            subplot.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+            subplot.grid(True)
         if block:
             show()
         else:
             draw()
 
 def get_graph_data(trajectory):
-    data = []
     times = collections.defaultdict(list)
     positions = collections.defaultdict(list)
     
@@ -62,6 +77,7 @@ def get_graph_data(trajectory):
                 times[key].append(t0)
                 positions[key].append( move[key] )
 
+    m = {}
     for key, t in times.iteritems():
         if key in [LEFT, RIGHT]:
             names = get_arm_joint_names(key)
@@ -72,12 +88,17 @@ def get_graph_data(trajectory):
         else:
             names = [key]
         pos = positions[key]
+        data = []
         for (i, name) in enumerate(names):
-            y = []
-            for pt in pos:
-                y.append( normalize( pt[i] ))
+            if name in ['x', 'y']:
+                y = [pt[i] for pt in pos]
+            else:
+                y = []
+                for pt in pos:
+                    y.append( normalize( pt[i] ))
             data.append((name, t, y))
-    return data
+        m[key] = data
+    return m
 
 def graph_trajectory(trajectory, gtype="o-", prefix_filter=None, label_prefix=None, **keywords):
     global THE_GRAPH
