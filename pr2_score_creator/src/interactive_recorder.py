@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('pr2_joint_recorder')
+import roslib; roslib.load_manifest('pr2_score_creator')
 import rospy
 import sys
 import yaml
