@@ -152,7 +152,7 @@ class InteractiveRecorder:
                 m[TIME] = nt
                 m2[TIME] = ot - dt
             else:
-                rospy.logerr("TIME TO SMALL")
+                rospy.logerr("TIME TOO SMALL")
         else:
             m[TIME] = nt
 
