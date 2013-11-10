@@ -29,7 +29,7 @@ class InteractiveRecorder:
         self.change_mode(0)
         self.mi = 0
         self.recorded = []
-        self.grapher = Grapher()
+        self.grapher = Grapher(keys=keys)
         
         self.controllers = {}
         for key in self.keys:
@@ -229,15 +229,13 @@ class InteractiveRecorder:
         self.grapher.graph(self.movements, 'o-')
         self.grapher.show(block=False)
         t0 = None
-        hilite = None
+
         while not rospy.is_shutdown():
             self.grapher.graph(self.movements)
 
             t = self.total_time(self.mi)
             if t != t0:
-                if hilite is not None:
-                    hilite.remove()
-                hilite = self.grapher.ax.axvspan(t-0.5, t+0.5, color='red', alpha=0.5)
+                hilite = self.grapher.hilite(t)
             if self.recorded is not None and len(self.recorded)>0:
                 self.grapher.graph(self.recorded, "-", label_prefix="REC", linewidth=5, alpha=0.5)
             self.grapher.show(block=False)
