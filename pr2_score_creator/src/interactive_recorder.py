@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import roslib; roslib.load_manifest('pr2_score_creator')
 import rospy
-import sys
-import yaml
-import os.path
+
 from joy_listener import JoyListener, PS3
-from sensor_msgs.msg import JointState
+#from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.converter import *
@@ -47,94 +45,42 @@ class InteractiveRecorder:
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
         self.joy[ PS3('left_joy') ] = self.toggle_teleop
 
-        if score.is_valid_index(0):
+        if self.score.has_data()
             self.goto(0)
         else:
             self.mode_switcher.mannequin_mode()
 
     def save_as_current(self):
-        self.save(self.mi)
+        self.score.save(self.mi, self.get_physical_state())        
 
     def save_as_next(self):
-        self.save(self.mi + 1, insert=True)
+        self.mi = self.score.insert(self.mi, self.get_physical_state())
 
-    def save(self, index, insert=False):
-        if len(self.movements)==0:
-            insert = True
-        if not insert:
-            m = self.movements[index]
-        else:
-            m = {}
-
+    def get_physical_state(self):
         mode = self.keys[self.key_i]
         if mode==ALL:
             mode = self.keys[1:]
         else:
             mode = [mode]
+        m = {}
         for key in mode:
             m[key] = self.controller.joint_watcher.get_positions( key )
-
-        if insert and index < len(self.movements):
-            t = get_time( self.movements[index] )
-            m[TIME] = t / 2
-            self.movements[index][TIME] = t / 2
-
-        if insert:
-            if index > len(self.movements):
-                index = len(self.movements)
-            self.movements = self.movements[:index] + [m] + self.movements[index:]
-        else:
-            self.movements[index] = m
-        self.mi = index
+        return m
 
     def delete(self):
-        if self.mi >= len(self.movements):
+        new_i = self.score.delete(self.mi)
+        if new_i is None:
             return
-        elif self.mi == len(self.movements)-1:
-            self.movements = self.movements[:self.mi]
-            self.mi -= 1
-        else:
-            t =  get_time( self.movements[self.mi]   )
-            t2 = get_time( self.movements[self.mi+1] )
-            self.movements[self.mi+1][TIME] = t + t2
-            self.movements = self.movements[:self.mi] + self.movements[self.mi+1:]
+        self.mi = new_i
         self.goto(0)
 
     def set_property(self):
-        if self.mi >= len(self.movements):
-            return
-
         field = raw_input("Field: ")
         value = raw_input("Value: ")
-
-        m = self.movements[self.mi]
-
-        """
-        if 'transition' not in m or m['transition'] == 'wait':
-            m['transition'] = 'impact'
-        else:
-            m['transition'] = 'wait'
-
-        print m['transition']"""
-        m[field] = value
+        self.score.set_property(self.mi, field, value)
 
     def change_time(self, factor, shift=True):
-        if self.mi >= len(self.movements):
-            return
-        m = self.movements[self.mi]
-        t = get_time( m )
-        nt = t * factor
-        if shift and self.mi + 1 < len(self.movements):
-            m2 = self.movements[self.mi + 1]
-            ot = get_time( m2 )
-            dt = nt - t
-            if ot > dt:
-                m[TIME] = nt
-                m2[TIME] = ot - dt
-            else:
-                rospy.logerr("TIME TOO SMALL")
-        else:
-            m[TIME] = nt
+        self.score.scale_time(self.mi, factor, shift)
 
     def start_action(self, movements):
         self.mode_switcher.position_mode()
@@ -145,31 +91,20 @@ class InteractiveRecorder:
         if starti is None:
             starti = self.mi
 
-        # start interface
-        self.start_action( self.movements[starti:] )
-
-        self.mi = len(self.movements)-1
+        # TODO: start interface
+        self.start_action( self.score.get_subset(starti) )
+        self.mi = self.score.num_keyframes()
 
     def goto(self, delta):
-        ni = self.mi + delta
-        if ni < 0 or ni >= len(self.movements):
-            return
-
-        m = self.movements[ni]
-        m2 = {}
-        for key in self.keys[1:]:
-            if key in m:
-                m2[key] = m[key]
-        self.start_action( [m2] )
-        self.mi = ni
+        new_i = self.mi + delta
+        m = self.score.get_keyframe(new_i)
+        self.start_action( [m] )
+        self.mi = new_i
 
     def change_mode(self, delta):
         self.key_i += delta 
         self.key_i = self.key_i % len(self.keys)
         rospy.loginfo("Current Mode: %s"%self.keys[self.key_i])
-
-
-
 
     def toggle_teleop(self):
         if self.joy.axes_cb is None:
@@ -185,16 +120,15 @@ class InteractiveRecorder:
         y = axes[2]
         self.controller.base.publish_command(.6*x, .6*y, .8*z)
 
-    def total_time(self, i):
-        return sum(get_time(m) for m in self.movements[:i+1])
 
     def spin(self):
         r = rospy.Rate(4)
-        while len(self.movements)==0:
+        while not self.score.has_data():
             r.sleep()
 
         while not rospy.is_shutdown():
             r.sleep()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive Motion Recorder')
