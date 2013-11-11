@@ -16,5 +16,5 @@
   <include file="$(find pr2_sith)/duel_core.launch"/>
 
   <arg name="nav" default="1"/>
-  <include file="$(find pr2_score_creator)/interactive_nav.launch" if="$(arg nav)"/>
+  <include file="$(find skyskysky_data)/launch/navigation.launch" if="$(arg nav)"/>
 </launch>

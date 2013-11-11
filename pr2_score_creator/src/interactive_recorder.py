@@ -38,14 +38,14 @@ class InteractiveRecorder:
         self.joy[ PS3('down') ] = lambda: self.change_mode(1)
         self.joy[ PS3('select') ] = self.play # play from here
         self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
-        self.joy[ PS3('ps3') ] = self.to_file
+        self.joy[ PS3('ps3') ] = self.score.to_file
         self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
         self.joy[ PS3('r2') ] = lambda: self.change_time(1.5)
         self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
         self.joy[ PS3('left_joy') ] = self.toggle_teleop
 
-        if self.score.has_data()
+        if self.score.has_data():
             self.goto(0)
         else:
             self.mode_switcher.mannequin_mode()
@@ -93,7 +93,7 @@ class InteractiveRecorder:
 
         # TODO: start interface
         self.start_action( self.score.get_subset(starti) )
-        self.mi = self.score.num_keyframes()
+        self.mi = self.score.num_keyframes() - 1
 
     def goto(self, delta):
         new_i = self.mi + delta

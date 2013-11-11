@@ -1,3 +1,5 @@
+from pr2_precise_trajectory import *
+from pr2_precise_trajectory.converter import save_trajectory, load_trajectory
 import os.path
 import yaml
 
@@ -25,7 +27,8 @@ class Score:
             self.movements.append(state)
         elif not self.is_valid_index(index):
             return
-        self.movements[index].apply(state)
+        else:
+            self.movements[index].update(state)
 
     def insert(self, after_index, state, ratio=0.5):
         index = after_index + 1
@@ -39,7 +42,7 @@ class Score:
             state[TIME] = t * ratio
             self.movements[index][TIME] = t * (1.0 - ratio)
 
-            self.movements = self.movements[:index] + [m] + self.movements[index:]
+            self.movements = self.movements[:index] + [state] + self.movements[index:]
         return index        
 
     def delete(self, index):
@@ -108,7 +111,7 @@ class Score:
         return self.movements[start_i:end_i]
 
     def num_keyframes(self):
-        return len(num_keyframes)
+        return len(self.movements)
 
     def to_file(self):
         print yaml.dump(self.movements)
