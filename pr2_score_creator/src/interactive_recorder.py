@@ -50,7 +50,7 @@ class InteractiveRecorder:
         if score.is_valid_index(0):
             self.goto(0)
         else:
-            self.switch_to(MANNEQUIN_CONTROLLERS)
+            self.mode_switcher.mannequin_mode()
 
     def save_as_current(self):
         self.save(self.mi)
@@ -137,9 +137,9 @@ class InteractiveRecorder:
             m[TIME] = nt
 
     def start_action(self, movements):
-        self.switch_to(POSITION_CONTROLLERS)
+        self.mode_switcher.position_mode()
         self.controller.do_action(movements)
-        self.switch_to(MANNEQUIN_CONTROLLERS)
+        self.mode_switcher.mannequin_mode()
 
     def play(self, starti=None):
         if starti is None:
