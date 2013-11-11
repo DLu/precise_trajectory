@@ -123,7 +123,7 @@ class InteractiveRecorder:
 
     def spin(self):
         r = rospy.Rate(4)
-        while not self.score.has_data():
+        while not self.score.has_data() and not rospy.is_shutdown():
             r.sleep()
 
         while not rospy.is_shutdown():
