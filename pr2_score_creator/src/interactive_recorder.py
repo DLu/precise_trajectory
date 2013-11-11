@@ -26,6 +26,7 @@ class InteractiveRecorder:
         self.score = Score(filename, directory)
         self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
+        self.interface = Interface(self.score, self.controller.joint_watcher)
 
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
@@ -93,13 +94,14 @@ class InteractiveRecorder:
         if starti is None:
             starti = self.mi
 
-        # TODO: start interface
+        self.interface.start(starti)
         self.start_action( self.score.get_subset(starti) )
+        self.interface.done()
         self.mi = self.score.num_keyframes() - 1
 
     def goto(self, delta):
         new_i = self.mi + delta
-        m = self.score.get_keyframe(new_i)
+        m = self.score.get_state(new_i)
         self.start_action( [m] )
         self.mi = new_i
 
@@ -129,6 +131,7 @@ class InteractiveRecorder:
             r.sleep()
 
         while not rospy.is_shutdown():
+            self.interface.cycle(self.mi)
             r.sleep()
 
 

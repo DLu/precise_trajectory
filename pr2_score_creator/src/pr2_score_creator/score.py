@@ -87,7 +87,7 @@ class Score:
             m[TIME] = new_t
 
     def total_time(self, i):
-        return sum(get_time(m) for m in self.movements[:i+1])
+        return sum(get_time(m) for m in self.get_subset(end_i=i+1))
 
     def is_valid_index(self, index=0):
         return 0 <= index and index < len(self.movements)
@@ -106,6 +106,12 @@ class Score:
         #    if key in m:
         #        m2[key] = m[key]
         return m
+
+    def get_state(self, index):
+        if not self.is_valid_index(index):
+            return {}
+        ms = self.get_subset(end_i=index+1)
+        return ms[0]
 
     def get_subset(self, start_i=0, end_i=None):
         return self.to_full(self.movements[start_i:end_i])
