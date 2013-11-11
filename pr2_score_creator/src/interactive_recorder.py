@@ -10,8 +10,9 @@ from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.converter import *
 from pr2_mechanism_msgs.srv import SwitchController
-from graph_trajectory import *
 import argparse
+
+from pr2_score_creator import *
 
 MANNEQUIN_CONTROLLERS = {LEFT: 'l_arm_controller_loose', RIGHT: 'r_arm_controller_loose', HEAD: 'head_traj_controller_loose'}
 POSITION_CONTROLLERS = {LEFT: 'l_arm_controller', RIGHT: 'r_arm_controller', HEAD: 'head_traj_controller'}
@@ -23,23 +24,17 @@ class InteractiveRecorder:
     def __init__(self, keys, filename, impact=False):
         rospy.init_node('interactive_recorder')
         self.time = None
-        self.filename = filename
         self.keys = [ALL] + keys
         self.key_i = 0
         self.change_mode(0)
         self.mi = 0
-        self.recorded = []
-        self.grapher = Grapher()
         
         self.controllers = {}
         for key in self.keys:
             if key in POSITION_CONTROLLERS:
                 self.controllers[key] = POSITION_CONTROLLERS[key]
 
-        if os.path.exists(self.filename):
-            self.movements = load_trajectory(self.filename)
-        else:
-            self.movements = []
+        self.score = Score(filename)
 
         self.controller = FullPr2Controller(keys=keys, impact=impact)
         rospy.loginfo("Waiting for control manager")
@@ -67,7 +62,7 @@ class InteractiveRecorder:
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
         self.joy[ PS3('left_joy') ] = self.toggle_teleop
 
-        if len(self.movements) > 0:
+        if score.is_valid_index(0):
             self.goto(0)
         else:
             self.switch_to(MANNEQUIN_CONTROLLERS)
@@ -164,11 +159,10 @@ class InteractiveRecorder:
     def play(self, starti=None):
         if starti is None:
             starti = self.mi
-        self.recorded = None
-        self.controller.joint_watcher.record()
-        t_off = self.total_time(starti-1)
+
+        # start interface
         self.start_action( self.movements[starti:] )
-        self.recorded = self.controller.joint_watcher.stop(t_off)
+
         self.mi = len(self.movements)-1
 
     def goto(self, delta):
@@ -189,10 +183,7 @@ class InteractiveRecorder:
         self.key_i = self.key_i % len(self.keys)
         rospy.loginfo("Current Mode: %s"%self.keys[self.key_i])
 
-    def to_file(self):
-        print yaml.dump(self.movements)
-        print
-        save_trajectory(self.movements, self.filename)
+
 
     def switch_to(self, controller_map):
         start = []
@@ -226,21 +217,11 @@ class InteractiveRecorder:
         r = rospy.Rate(4)
         while len(self.movements)==0:
             r.sleep()
-        self.grapher.graph(self.movements, 'o-')
-        self.grapher.show(block=False)
-        t0 = None
-        hilite = None
-        while not rospy.is_shutdown():
-            self.grapher.graph(self.movements)
 
-            t = self.total_time(self.mi)
-            if t != t0:
-                if hilite is not None:
-                    hilite.remove()
-                hilite = self.grapher.ax.axvspan(t-0.5, t+0.5, color='red', alpha=0.5)
-            if self.recorded is not None and len(self.recorded)>0:
-                self.grapher.graph(self.recorded, "-", label_prefix="REC", linewidth=5, alpha=0.5)
-            self.grapher.show(block=False)
+        while not rospy.is_shutdown():
+
+
+            
             r.sleep()
 
 if __name__ == '__main__':
