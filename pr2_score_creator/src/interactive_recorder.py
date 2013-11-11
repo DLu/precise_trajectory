@@ -15,7 +15,7 @@ BUTTON_LAG = 1.0
 ALL = 'all'
 
 class InteractiveRecorder:
-    def __init__(self, keys, filename, impact=False):
+    def __init__(self, keys, filename, directory=None, impact=False):
         rospy.init_node('interactive_recorder')
         self.time = None
         self.keys = [ALL] + keys
@@ -23,7 +23,7 @@ class InteractiveRecorder:
         self.change_mode(0)
         self.mi = 0
         
-        self.score = Score(filename)
+        self.score = Score(filename, directory)
         self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
 
@@ -133,6 +133,7 @@ class InteractiveRecorder:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive Motion Recorder')
     parser.add_argument('filename')
+    parser.add_argument('directory', nargs='?')
     parser.add_argument('-l', dest='keys', action='append_const', const=LEFT)
     parser.add_argument('-r', dest='keys', action='append_const', const=RIGHT)
     parser.add_argument('-b', dest='keys', action='append_const', const=BASE)
@@ -150,6 +151,6 @@ if __name__ == '__main__':
         print "Must specify at least one part"
         exit(1)
 
-    ir = InteractiveRecorder(args.keys, args.filename, args.impact)
+    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact)
     ir.spin()
 

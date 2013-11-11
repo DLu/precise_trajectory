@@ -108,7 +108,7 @@ class Score:
         return m
 
     def get_subset(self, start_i=0, end_i=None):
-        return self.movements[start_i:end_i]
+        return self.to_full(self.movements[start_i:end_i])
 
     def num_keyframes(self):
         return len(self.movements)
@@ -118,14 +118,22 @@ class Score:
         print
         save_trajectory(self.movements, self.filename)
 
-    def to_full(self, filename=None):
-        if filename is None:
-            filename = self.filename
+    def to_full(self, arg=None):
+        if arg is None:
+            ms = self.movements
+        elif type(arg)==str:
+            ms = load_trajectory(arg)
+        else:
+            ms = arg
+
         full = []
-        for move in load_trajectory(filename):
+        for move in ms:
             if MACRO in move:
                 key = move[MACRO]
-                full += self.to_full("%s/%s.yaml"%(self.directory, key))
+                expanded = self.to_full("%s/%s.yaml"%(self.directory, key))
+                if TIME in move:
+                    expanded[0][TIME] = move[TIME]
+                full += expanded
             else:
                 full.append(move)
         return full
