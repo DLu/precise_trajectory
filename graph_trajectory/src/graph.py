@@ -22,4 +22,5 @@ if __name__ == '__main__':
         graph_trajectory(trajectory, 'o-', prefix_filter='r_',  label_prefix=fn, linewidth=width, markersize=ms)
 
     show_graph(True)
+    raw_input()
 
