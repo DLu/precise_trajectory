@@ -26,8 +26,18 @@ class Grapher:
             box = subplot.get_position()
             subplot.set_position([box.x0, box.y0, box.width * 0.8, box.height])
             self.subplots[key] = subplot
+
+        self.hilites = []
                 
         draw()
+
+    def hilite(self, t):
+        for hilite in self.hilites:
+            hilite.remove()
+        self.hilites = []
+        for subplot in self.subplots.values():
+            hilite = subplot.axvspan(t-0.5, t+0.5, color='red', alpha=0.5)
+            self.hilites.append(hilite)
 
     def get_subplot(self, key):
         if key in self.subplots:

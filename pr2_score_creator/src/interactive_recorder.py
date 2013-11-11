@@ -219,9 +219,6 @@ class InteractiveRecorder:
             r.sleep()
 
         while not rospy.is_shutdown():
-
-
-            
             r.sleep()
 
 if __name__ == '__main__':
