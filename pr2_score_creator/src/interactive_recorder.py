@@ -3,6 +3,7 @@ import roslib; roslib.load_manifest('pr2_score_creator')
 import rospy
 
 from joy_listener import JoyListener, PS3
+from std_srvs.srv import Empty
 #from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
@@ -27,6 +28,8 @@ class InteractiveRecorder:
         self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
         self.interface = Interface(self.score, self.controller.joint_watcher)
+        #rospy.wait_for_service('/proceed')
+        #self.proxy = rospy.ServiceProxy('/proceed', Empty)
 
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
@@ -101,8 +104,13 @@ class InteractiveRecorder:
 
     def goto(self, delta):
         new_i = self.mi + delta
-        m = self.score.get_state(new_i)
-        self.start_action( [m] )
+        #m = self.score.get_state(new_i)
+        m = self.score.get_keyframe(new_i)
+        m2 = {}
+        m2.update(m)
+        if 'transition' in m2:
+            del m2['transition']
+        self.start_action( [m2] )
         self.mi = new_i
 
     def change_mode(self, delta):
