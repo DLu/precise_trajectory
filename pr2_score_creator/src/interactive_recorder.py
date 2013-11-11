@@ -77,6 +77,8 @@ class InteractiveRecorder:
     def set_property(self):
         field = raw_input("Field: ")
         value = raw_input("Value: ")
+        if field=='t':
+            value = float(value)
         self.score.set_property(self.mi, field, value)
 
     def change_time(self, factor, shift=True):
