@@ -9,13 +9,9 @@ from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.converter import *
-from pr2_mechanism_msgs.srv import SwitchController
 import argparse
 
 from pr2_score_creator import *
-
-MANNEQUIN_CONTROLLERS = {LEFT: 'l_arm_controller_loose', RIGHT: 'r_arm_controller_loose', HEAD: 'head_traj_controller_loose'}
-POSITION_CONTROLLERS = {LEFT: 'l_arm_controller', RIGHT: 'r_arm_controller', HEAD: 'head_traj_controller'}
 
 BUTTON_LAG = 1.0
 ALL = 'all'
@@ -29,20 +25,9 @@ class InteractiveRecorder:
         self.change_mode(0)
         self.mi = 0
         
-        self.controllers = {}
-        for key in self.keys:
-            if key in POSITION_CONTROLLERS:
-                self.controllers[key] = POSITION_CONTROLLERS[key]
-
         self.score = Score(filename)
-
+        self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
-        rospy.loginfo("Waiting for control manager")
-        rospy.wait_for_service('pr2_controller_manager/switch_controller')
-        rospy.loginfo("Got control manager!")
-        self.switcher = rospy.ServiceProxy('pr2_controller_manager/switch_controller', SwitchController)
-
-        self.switch_to(MANNEQUIN_CONTROLLERS)
 
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
@@ -185,16 +170,6 @@ class InteractiveRecorder:
 
 
 
-    def switch_to(self, controller_map):
-        start = []
-        stop = []
-        for key in self.controllers:
-            cname = controller_map[key]
-            rospy.loginfo("Switching to %s"%cname)
-            stop.append( self.controllers[key] ) 
-            start.append( cname ) 
-            self.controllers[key] = cname
-        self.switcher(start, stop, 1)
 
     def toggle_teleop(self):
         if self.joy.axes_cb is None:
