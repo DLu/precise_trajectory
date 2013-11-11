@@ -2,11 +2,11 @@ import os.path
 import yaml
 
 class Score:
-    def __init__(self, filedir, starting_scene):
+    def __init__(self, filename, filedir=None):
         self.directory = filedir
         self.library = {}
         self.filename = None
-        self.load(starting_scene)
+        self.load(filename)
 
     def load(self, filename, save=True):
         if save and self.filename is not None:
