@@ -31,8 +31,8 @@ class InteractiveRecorder:
             self.interface = Interface(self.score, self.controller.joint_watcher)
         else:
             self.interface = None
-        #rospy.wait_for_service('/proceed')
-        #self.proxy = rospy.ServiceProxy('/proceed', Empty)
+        rospy.wait_for_service('/proceed')
+        self.proxy = rospy.ServiceProxy('/proceed', Empty)
 
         self.joy = JoyListener(BUTTON_LAG)
         self.joy[ PS3('x') ] = self.save_as_current
@@ -43,7 +43,7 @@ class InteractiveRecorder:
         self.joy[ PS3('left') ] = lambda: self.goto(-1)
         self.joy[ PS3('up') ] = lambda: self.change_mode(-1)
         self.joy[ PS3('down') ] = lambda: self.change_mode(1)
-        self.joy[ PS3('select') ] = self.serve #self.play # play from here
+        self.joy[ PS3('select') ] = self.proxy #self.play # play from here
         self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
         self.joy[ PS3('ps3') ] = self.score.to_file
         self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
@@ -56,9 +56,6 @@ class InteractiveRecorder:
             self.goto(0)
         else:
             self.mode_switcher.mannequin_mode()
-
-    def serve(self):
-        print "SERVE"
 
     def save_as_current(self):
         self.score.save(self.mi, self.get_physical_state())        
@@ -165,6 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('-rh', dest='keys', action='append_const', const=RIGHT_HAND)
     parser.add_argument('-a', '--all', action='store_true', dest='all')
     parser.add_argument('-i', '--impact', action='store_true', dest='impact')
+    parser.add_argument('-g', '--gui', action='store_true', dest='gui')
 
     args = parser.parse_args()
     if args.all:
@@ -174,6 +172,6 @@ if __name__ == '__main__':
         print "Must specify at least one part"
         exit(1)
 
-    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact)
+    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact, args.gui)
     ir.spin()
 
