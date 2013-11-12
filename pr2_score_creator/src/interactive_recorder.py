@@ -82,10 +82,32 @@ class InteractiveRecorder:
         self.goto(0)
 
     def set_property(self):
-        field = raw_input("Field: ")
-        value = raw_input("Value: ")
-        if field=='t':
-            value = float(value)
+        while not rospy.is_shutdown():
+            print "(l)abel change | (s)ervice transition | (i)mpact transition | (r)emove transition | change (t)ime | e(x)it"
+            selection = raw_input()
+            if selection == 'l':
+                field = 'label'
+                print self.score.get_property(self.mi, field)
+                value = raw_input()
+                break
+            elif selection == 't':
+                field = 't'
+                value = float(raw_input())
+                break
+            elif selection=='s':
+                field = 'transition'
+                value = 'service'
+                break
+            elif selection=='i':
+                field = 'transition'
+                value = 'impact'
+                break
+            elif selection=='r':
+                field = 'transition'
+                value = 'wait'
+                break
+            elif selection=='x':
+                return
         self.score.set_property(self.mi, field, value)
 
     def change_time(self, factor, shift=True):
@@ -115,6 +137,8 @@ class InteractiveRecorder:
         m2.update(m)
         if 'transition' in m2:
             del m2['transition']
+        if 'label' in m2:
+            rospy.loginfo('State: %s'%m2['label'])
         self.start_action( [m2] )
         self.mi = new_i
 

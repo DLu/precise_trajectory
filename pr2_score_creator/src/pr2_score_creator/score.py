@@ -64,6 +64,12 @@ class Score:
         m = self.movements[index]
         m[field] = value
 
+    def get_property(self, index, field):
+        if not self.is_valid_index(index):
+            return
+        m = self.movements[index]
+        return m.get(field, None)
+
     def scale_time(self, index, factor, shift=True):
         """If shift is True, the movement 
             stays the same length """
