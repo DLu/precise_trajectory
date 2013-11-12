@@ -16,7 +16,7 @@ BUTTON_LAG = 1.0
 ALL = 'all'
 
 class InteractiveRecorder:
-    def __init__(self, keys, filename, directory=None, impact=False):
+    def __init__(self, keys, filename, directory=None, impact=False, interface=False):
         rospy.init_node('interactive_recorder')
         self.time = None
         self.keys = [ALL] + keys
@@ -27,7 +27,10 @@ class InteractiveRecorder:
         self.score = Score(filename, directory)
         self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
-        self.interface = Interface(self.score, self.controller.joint_watcher)
+        if interface:
+            self.interface = Interface(self.score, self.controller.joint_watcher)
+        else:
+            self.interface = None
         #rospy.wait_for_service('/proceed')
         #self.proxy = rospy.ServiceProxy('/proceed', Empty)
 
@@ -40,7 +43,7 @@ class InteractiveRecorder:
         self.joy[ PS3('left') ] = lambda: self.goto(-1)
         self.joy[ PS3('up') ] = lambda: self.change_mode(-1)
         self.joy[ PS3('down') ] = lambda: self.change_mode(1)
-        self.joy[ PS3('select') ] = self.play # play from here
+        self.joy[ PS3('select') ] = self.serve #self.play # play from here
         self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
         self.joy[ PS3('ps3') ] = self.score.to_file
         self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
@@ -53,6 +56,9 @@ class InteractiveRecorder:
             self.goto(0)
         else:
             self.mode_switcher.mannequin_mode()
+
+    def serve(self):
+        print "SERVE"
 
     def save_as_current(self):
         self.score.save(self.mi, self.get_physical_state())        
@@ -97,9 +103,11 @@ class InteractiveRecorder:
         if starti is None:
             starti = self.mi
 
-        self.interface.start(starti)
+        if self.interface:
+            self.interface.start(starti)
         self.start_action( self.score.get_subset(starti) )
-        self.interface.done()
+        if self.interface:
+            self.interface.done()
         self.mi = self.score.num_keyframes() - 1
 
     def goto(self, delta):
@@ -139,7 +147,9 @@ class InteractiveRecorder:
             r.sleep()
 
         while not rospy.is_shutdown():
-            self.interface.cycle(self.mi)
+            if self.interface:
+                self.interface.cycle(self.mi)
+            
             r.sleep()
 
 
