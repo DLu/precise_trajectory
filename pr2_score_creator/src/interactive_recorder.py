@@ -135,7 +135,8 @@ class InteractiveRecorder:
         self.busy = True
         new_i = self.mi + delta
         #m = self.score.get_state(new_i)
-        m = self.score.get_keyframe(new_i)
+        m = self.score.get_keyframe(new_i, delta==-1)
+
         m2 = {}
         m2.update(m)
         if 'transition' in m2:

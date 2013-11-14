@@ -101,11 +101,14 @@ class Score:
     def has_data(self):
         return self.is_valid_index()
 
-    def get_keyframe(self, index):
+    def get_keyframe(self, index, backwards=False):
         if not self.is_valid_index(index):
             return {}
 
-        m = self.movements[index]
+        m = {}
+        m.update(self.movements[index])
+        if backwards and index + 1< len(self.movements):
+            m[TIME] = get_time(self.movements[index+1])
         # TODO: Check if need the specific subset
         #m2 = {}
         #for key in self.keys[1:]:
