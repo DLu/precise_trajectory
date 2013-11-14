@@ -22,6 +22,7 @@ class InteractiveRecorder:
         self.key_i = 0
         self.change_mode(0)
         self.mi = 0
+        self.busy = False
         
         self.score = Score(filename, directory)
         self.mode_switcher = ModeSwitcher(keys)
@@ -129,6 +130,9 @@ class InteractiveRecorder:
         self.mi = self.score.num_keyframes() - 1
 
     def goto(self, delta):
+        if self.busy:
+            return
+        self.busy = True
         new_i = self.mi + delta
         #m = self.score.get_state(new_i)
         m = self.score.get_keyframe(new_i)
@@ -137,9 +141,12 @@ class InteractiveRecorder:
         if 'transition' in m2:
             del m2['transition']
         if 'label' in m2:
-            rospy.loginfo('State: %s'%m2['label'])
+            rospy.loginfo('State: %s [%d]'%(m2['label'], new_i))
+        else:
+            rospy.loginfo('State: [%d]'%new_i)
         self.start_action( [m2] )
         self.mi = new_i
+        self.busy = False
 
     def change_mode(self, delta):
         self.key_i += delta 
