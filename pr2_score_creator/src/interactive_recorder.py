@@ -134,6 +134,8 @@ class InteractiveRecorder:
             return
         self.busy = True
         new_i = self.mi + delta
+        if not self.score.is_valid_index(new_i):
+            return
         #m = self.score.get_state(new_i)
         m = self.score.get_keyframe(new_i, delta==-1)
 
