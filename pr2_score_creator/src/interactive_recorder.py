@@ -4,7 +4,6 @@ import rospy
 
 from joy_listener import JoyListener, PS3
 from std_srvs.srv import Empty
-#from sensor_msgs.msg import JointState
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.full_controller import FullPr2Controller
 from pr2_precise_trajectory.converter import *
@@ -184,13 +183,14 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--head', dest='keys', action='append_const', const=HEAD)
     parser.add_argument('-lh', dest='keys', action='append_const', const=LEFT_HAND)
     parser.add_argument('-rh', dest='keys', action='append_const', const=RIGHT_HAND)
+    parser.add_argument('-s', '--audio', dest='keys', action='append_const', const=AUDIO)
     parser.add_argument('-a', '--all', action='store_true', dest='all')
     parser.add_argument('-i', '--impact', action='store_true', dest='impact')
     parser.add_argument('-g', '--gui', action='store_true', dest='gui')
 
     args = parser.parse_args()
     if args.all:
-        args.keys = [LEFT, RIGHT, BASE, HEAD, LEFT_HAND, RIGHT_HAND]
+        args.keys = [LEFT, RIGHT, BASE, HEAD, LEFT_HAND, RIGHT_HAND, AUDIO]
 
     if args.keys is None or len(args.keys)==0:
         print "Must specify at least one part"
