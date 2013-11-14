@@ -7,11 +7,12 @@ from precise_sound.msg import *
 
 import sys
 rospy.init_node('SoundClient')
-a = actionlib.SimpleActionClient('/precise_sound/play', PlaySoundAction)
+a = actionlib.SimpleActionClient('/precise_sound/play', PlaySoundsAction)
 a.wait_for_server()
-goal = PlaySoundGoal()
-goal.filename = sys.argv[1]
+goal = PlaySoundsGoal()
+goal.filenames.append(sys.argv[1])
 goal.header.stamp = rospy.Time.now()
+goal.times.append(0.0)
 
 a.send_goal(goal)
 
