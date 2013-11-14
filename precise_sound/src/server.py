@@ -22,6 +22,8 @@ class SoundServer:
             r.sleep()
         sound.play()
 
+        self.server.set_succeeded()
+
 if __name__=='__main__':
     pm = SoundServer()
     rospy.spin()
