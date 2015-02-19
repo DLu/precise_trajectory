@@ -2,14 +2,14 @@
   <name>pr2_joint_recorder</name>
   <version>0.5.0</version>
   <description>pr2_joint_recorder</description>
-  <maintainer email="">David V. Lu!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/pr2_joint_recorder</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David V. Lu!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
@@ -29,6 +29,10 @@
   <run_depend>pr2_precise_trajectory</run_depend>
   <run_depend>pr2_mechanism_msgs</run_depend>
   <run_depend>graph_trajectory</run_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>pr2_description</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>rospy</test_depend> -->

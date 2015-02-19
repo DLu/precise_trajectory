@@ -2,14 +2,14 @@
   <name>joint_limit_tools</name>
   <version>0.5.0</version>
   <description>joint_limit_tools</description>
-  <maintainer email="">David V. Lu!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/joint_limit_tools</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David V. Lu!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>

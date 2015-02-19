@@ -2,14 +2,14 @@
   <name>pr2_kinect_teleop</name>
   <version>0.5.0</version>
   <description>Another simple demo that moves the PR2 based on an openni-recognized skeleton</description>
-  <maintainer email="">David V. Lu!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/pr2_kinect_teleop</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David V. Lu!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
@@ -21,6 +21,7 @@
   <build_depend>pr2_gripper_sensor_msgs</build_depend>
   <build_depend>pr2_precise_trajectory</build_depend>
   <build_depend>actionlib</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>rospy</run_depend>
@@ -29,6 +30,10 @@
   <run_depend>pr2_gripper_sensor_msgs</run_depend>
   <run_depend>pr2_precise_trajectory</run_depend>
   <run_depend>actionlib</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
+  <run_depend>kinect_mocap</run_depend>
+  <run_depend>mocap_visualization</run_depend>
+  <run_depend>retarget</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>rospy</test_depend> -->

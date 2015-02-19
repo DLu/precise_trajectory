@@ -2,14 +2,14 @@
   <name>pr2_score_creator</name>
   <version>0.5.0</version>
   <description>pr2_score_creator</description>
-  <maintainer email="">David!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/pr2_score_creator</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
@@ -21,6 +21,7 @@
   <build_depend>pr2_precise_trajectory</build_depend>
   <build_depend>pr2_mechanism_msgs</build_depend>
   <build_depend>graph_trajectory</build_depend>
+  <build_depend>std_srvs</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>rospy</run_depend>
@@ -29,6 +30,15 @@
   <run_depend>pr2_precise_trajectory</run_depend>
   <run_depend>pr2_mechanism_msgs</run_depend>
   <run_depend>graph_trajectory</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>acting_trajectories_2012</run_depend>
+  <run_depend>map_server</run_depend>
+  <run_depend>pr2_controller_manager</run_depend>
+  <run_depend>pr2_mannequin_mode</run_depend>
+  <run_depend>pr2_navigation_global</run_depend>
+  <run_depend>pr2_sith</run_depend>
+  <run_depend>skyskysky_data</run_depend>
+  <run_depend>wu_pr2_2dnav</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>rospy</test_depend> -->

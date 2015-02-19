@@ -2,14 +2,14 @@
   <name>graph_trajectory</name>
   <version>0.5.0</version>
   <description>graph_trajectory</description>
-  <maintainer email="">David!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/graph_trajectory</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>

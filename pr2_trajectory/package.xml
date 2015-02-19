@@ -2,14 +2,14 @@
   <name>pr2_trajectory</name>
   <version>0.5.0</version>
   <description>pr2_trajectory</description>
-  <maintainer email="">David V. Lu!!</maintainer>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/pr2_trajectory</url>
   <!-- <url type="bugtracker"></url> -->
 
-  <author>David V. Lu!!</author>
+  <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
@@ -37,6 +37,14 @@
   <run_depend>joint_limit_tools</run_depend>
   <run_depend>control_msgs</run_depend>
   <run_depend>mocap_analysis</run_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>pr2_description</run_depend>
+  <run_depend>retarget</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>trajectory_filter_server</run_depend>
+  <run_depend>trajectory_tutorials</run_depend>
+  <run_depend>xacro</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>rospy</test_depend> -->
