@@ -12,4 +12,4 @@ if __name__ == '__main__':
     g = Grapher(keys=trajectory[0].keys())
     g.graph(trajectory)
     g.show(True)
-
+    raw_input()

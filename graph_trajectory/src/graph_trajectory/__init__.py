@@ -11,9 +11,9 @@ THE_GRAPH = None
 FIELDS = [LEFT, RIGHT, BASE, LEFT_HAND, RIGHT_HAND, HEAD]
 
 class Grapher:
-    def __init__(self, name=None, keys=[None]):
+    def __init__(self, name=None, keys=[None], scale=1.0):
         self.plots = {}
-        self.fig = figure(1, figsize=(18, 16))
+        self.fig = figure(1, figsize=(int(18*scale), int(16*scale)))
         self.fig.subplots_adjust(hspace=0)
         if name is None:
             name = "Trajectory Plotter"
