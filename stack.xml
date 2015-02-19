@@ -1,9 +1,0 @@
-<stack>
-  <description brief="pr2_precise_arms">pr2_precise_arms</description>
-  <author>Maintained by David!!</author>
-  <license>BSD</license>  
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/pr2_precise_arms</url>
-  <depend stack="ros" />
-
-</stack>

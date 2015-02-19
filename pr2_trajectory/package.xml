@@ -1,0 +1,53 @@
+<package>
+  <name>pr2_trajectory</name>
+  <version>0.5.0</version>
+  <description>pr2_trajectory</description>
+  <maintainer email="">David V. Lu!!</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/pr2_trajectory</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>David V. Lu!!</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>rospy</build_depend>
+  <build_depend>pr2_controllers_msgs</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  <build_depend>trajectory_tools</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>arm_navigation_msgs</build_depend>
+  <build_depend>joint_limit_tools</build_depend>
+  <build_depend>control_msgs</build_depend>
+  <build_depend>mocap_analysis</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>rospy</run_depend>
+  <run_depend>pr2_controllers_msgs</run_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
+  <run_depend>trajectory_tools</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>arm_navigation_msgs</run_depend>
+  <run_depend>joint_limit_tools</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>mocap_analysis</run_depend>
+
+  <!-- Dependencies needed only for running tests. -->
+  <!-- <test_depend>rospy</test_depend> -->
+  <!-- <test_depend>pr2_controllers_msgs</test_depend> -->
+  <!-- <test_depend>actionlib</test_depend> -->
+  <!-- <test_depend>trajectory_msgs</test_depend> -->
+  <!-- <test_depend>trajectory_tools</test_depend> -->
+  <!-- <test_depend>sensor_msgs</test_depend> -->
+  <!-- <test_depend>arm_navigation_msgs</test_depend> -->
+  <!-- <test_depend>joint_limit_tools</test_depend> -->
+  <!-- <test_depend>control_msgs</test_depend> -->
+  <!-- <test_depend>mocap_analysis</test_depend> -->
+
+</package>

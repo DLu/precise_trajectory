@@ -1,0 +1,29 @@
+<package>
+  <name>precise_sound</name>
+  <version>0.5.0</version>
+  <description></description>
+  <maintainer email="">David!!</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website"></url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>David!!</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+  <build_depend>rospy</build_depend>
+  <build_depend>actionlib</build_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>rospy</run_depend>
+  <run_depend>actionlib</run_depend>
+
+  <!-- Dependencies needed only for running tests. -->
+  <!-- <test_depend>rospy</test_depend> -->
+  <!-- <test_depend>actionlib</test_depend> -->
+
+</package>
