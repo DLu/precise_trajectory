@@ -20,7 +20,6 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>easy_markers</build_depend>
-  <build_depend>urdf_python</build_depend>
   <build_depend>actionlib</build_depend>
   <build_depend>actionlib_msgs</build_depend>
   <build_depend>pr2_controllers_msgs</build_depend>
@@ -32,7 +31,6 @@
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>easy_markers</run_depend>
-  <run_depend>urdf_python</run_depend>
   <run_depend>actionlib</run_depend>
   <run_depend>actionlib_msgs</run_depend>
   <run_depend>pr2_controllers_msgs</run_depend>
@@ -48,7 +46,6 @@
   <!-- <test_depend>sensor_msgs</test_depend> -->
   <!-- <test_depend>tf</test_depend> -->
   <!-- <test_depend>easy_markers</test_depend> -->
-  <!-- <test_depend>urdf_python</test_depend> -->
   <!-- <test_depend>actionlib</test_depend> -->
   <!-- <test_depend>actionlib_msgs</test_depend> -->
   <!-- <test_depend>pr2_controllers_msgs</test_depend> -->

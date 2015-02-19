@@ -16,13 +16,11 @@
 
   <!-- Dependencies needed to compile this package. -->
   <build_depend>rospy</build_depend>
-  <build_depend>urdf_python</build_depend>
   <build_depend>arm_navigation_msgs</build_depend>
   <build_depend>pr2_precise_trajectory</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>rospy</run_depend>
-  <run_depend>urdf_python</run_depend>
   <run_depend>arm_navigation_msgs</run_depend>
   <run_depend>pr2_precise_trajectory</run_depend>
 
