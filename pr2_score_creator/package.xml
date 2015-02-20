@@ -31,14 +31,11 @@
   <run_depend>pr2_mechanism_msgs</run_depend>
   <run_depend>graph_trajectory</run_depend>
   <run_depend>std_srvs</run_depend>
-  <run_depend>acting_trajectories_2012</run_depend>
   <run_depend>map_server</run_depend>
   <run_depend>pr2_controller_manager</run_depend>
   <run_depend>pr2_mannequin_mode</run_depend>
   <run_depend>pr2_navigation_global</run_depend>
   <run_depend>pr2_sith</run_depend>
-  <run_depend>skyskysky_data</run_depend>
-  <run_depend>wu_pr2_2dnav</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>rospy</test_depend> -->
