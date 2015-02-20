@@ -8,6 +8,8 @@ add_action_files(
     FILES PlaySounds.action
 )
 
+catkin_python_setup()
+
 generate_messages(
     DEPENDENCIES actionlib_msgs 
 )

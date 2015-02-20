@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(modify_trajectory)
 
+catkin_python_setup()
+
 catkin_package(
     DEPENDS rospy pr2_precise_trajectory graph_trajectory
     CATKIN_DEPENDS # TODO

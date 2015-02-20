@@ -3,6 +3,8 @@ project(pr2_score_creator)
 
 find_package(catkin REQUIRED COMPONENTS rospy joy_listener sensor_msgs pr2_precise_trajectory pr2_mechanism_msgs graph_trajectory)
 
+catkin_python_setup()
+
 catkin_package(
     DEPENDS rospy joy_listener sensor_msgs pr2_precise_trajectory pr2_mechanism_msgs graph_trajectory
     CATKIN_DEPENDS # TODO
