@@ -137,13 +137,11 @@ class MotionPlayback:
         r = rospy.Rate(4)
         while not self.score.has_data() and not rospy.is_shutdown():
             r.sleep()
-        print 'a'    
 
         while not rospy.is_shutdown():
-            print 'b'    
             if self.interface:
                 self.interface.cycle(self.mi)
-            print 'c'
+            
             r.sleep()
 
 
