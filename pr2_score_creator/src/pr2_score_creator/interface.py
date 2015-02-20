@@ -11,11 +11,13 @@ class Interface:
 
     def start(self, start_i):
         self.recorded = None
-        self.joint_watcher.record()
+        if self.joint_watcher:
+            self.joint_watcher.record()
         self.t_off = self.score.total_time(start_i-1)
 
     def done(self):
-        self.recorded = self.joint_watcher.stop(self.t_off)
+        if self.joint_watcher:
+            self.recorded = self.joint_watcher.stop(self.t_off)
 
     def cycle(self, index):
         self.grapher.graph(self.score.to_full())
