@@ -46,7 +46,8 @@ class Offline:
                         self.marker = None
                     elif self.score.movements[self.mi].get('transition', 'wait')=='service':
                         self.service_flag = False
-                        self.marker = None    
+                        self.marker = None
+                        print 'new service'    
                     else:     
                         self.marker = rospy.Time.now()
                 else:       
@@ -54,7 +55,7 @@ class Offline:
                     
                     
             
-            state = self.score.get_state(self.mi, self.t, ['b', 'l', 'r'])
+            state = self.score.get_state(self.mi, self.t, ['b', 'l', 'r', 'h'])
             
             if 'b' in state:
                 bs = state['b']
