@@ -3,7 +3,11 @@ import rospy
 from pr2_score_creator import *
 from sensor_msgs.msg import JointState
 from graph_trajectory import get_graph_data
+from pr2_precise_trajectory.arm_controller import get_arm_joint_names
+from pr2_precise_trajectory.head_controller import HEAD_JOINTS 
 import tf
+
+JNAMES = {'h': HEAD_JOINTS, 'l': get_arm_joint_names('l'), 'r': get_arm_joint_names('r')}
 
 class Offline:
     def __init__(self, filename, directory=None):
@@ -41,7 +45,7 @@ class Offline:
                     
                     
             
-            state = self.score.get_state(self.mi, self.t, ['b'])
+            state = self.score.get_state(self.mi, self.t, ['b', 'l', 'r'])
             
             if 'b' in state:
                 bs = state['b']
@@ -51,6 +55,15 @@ class Offline:
                          rospy.Time.now(),
                          '/base_footprint',
                          '/map')
+            js = JointState()
+            for key in ['l', 'r', 'h']:
+                names = JNAMES[key]
+                if key not in state:
+                    continue
+                for name, value in zip(names, state[key]):
+                    js.name.append(name)
+                    js.position.append(value)            
+            self.pub.publish(js)        
 
 
 import sys
