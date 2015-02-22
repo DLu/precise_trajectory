@@ -149,3 +149,6 @@ class Score:
             else:
                 full.append(move)
         return full
+
+    def __repr__(self):
+        return str(self.movements)
