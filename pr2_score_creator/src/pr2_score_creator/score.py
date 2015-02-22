@@ -2,6 +2,7 @@ from pr2_precise_trajectory import *
 from pr2_precise_trajectory.converter import save_trajectory, load_trajectory
 import os.path
 import yaml
+import collections
 
 class Score:
     def __init__(self, filename, filedir=None):
@@ -149,6 +150,46 @@ class Score:
             else:
                 full.append(move)
         return full
+        
+    def get_absolute_time(self, index):
+        t = 0.0
+        for m in self.movements[:index]:
+            t += get_time(m)
+        return t
+
+    def get_start_keyframe(self, key, index):
+        i = index
+        while i > 0:
+            if key in self.movements[i]:
+                return i
+            i -= 1
+        return i
+        
+    def get_end_keyframe(self, key, index):
+        i = index + 1
+        while i < len(self.movements):
+            if key in self.movements[i]:
+                return i
+            i += 1
+        return i    
+        
+    def get_state(self, index, time, keys=['b']):
+        state = collections.defaultdict(dict)
+        t2 = self.get_absolute_time(index) + time
+        for key in keys:
+            i0 = self.get_start_keyframe(key, index)
+            i1 = self.get_end_keyframe(key, index)
+            start = self.movements[ i0 ][key]
+            end = self.movements[ i1 ][key]
+            t0 = self.get_absolute_time(i0)
+            t1 = self.get_absolute_time(i1)
+            print i0, i1, t0, t1
+            pct = (t2 - t0) / (t1 - t0)
+            d = []
+            for a,b in zip(start, end):
+                d.append( a + (b-a)*pct )
+            state[key] = d
+        return dict(state)
 
     def __repr__(self):
         return str(self.movements)
