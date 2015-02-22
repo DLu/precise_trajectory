@@ -11,25 +11,46 @@ class Offline:
         self.pub = rospy.Publisher('/source_joints', JointState)
         self.tf = tf.TransformBroadcaster()
         self.score = Score(filename, directory)
-        import pprint
-        pprint.pprint( get_graph_data(self.score.movements) )
         
         self.mi = 0
         self.t = 0
         
-        #self.goto(0)
+        rospy.sleep(5)
+        print "GO"
+        
+        
+        self.marker = rospy.Time.now()
+        
         
 
     def spin(self):
         while not rospy.is_shutdown():
-            m0 = self.score.movements[self.mi]
+            if self.marker is not None:
+                ellapsed = rospy.Time.now() - self.marker
+                es = ellapsed.to_sec()
+                t = get_time(self.score.movements[self.mi])
+                if es > t:
+                    self.mi += 1
+                    self.t = 0.0
+                    if self.mi >= len(self.score.movements):
+                        self.marker = None
+                    else:     
+                        self.marker = rospy.Time.now()
+                else:       
+                    self.t = es
+                    
+                    
             
+            state = self.score.get_state(self.mi, self.t, ['b'])
             
-            self.tf.sendTransform((5, 5, 0),
-                     tf.transformations.quaternion_from_euler(0, 0, 1.51),
-                     rospy.Time.now(),
-                     '/base_footprint',
-                     "/map")
+            if 'b' in state:
+                bs = state['b']
+            
+                self.tf.sendTransform((bs[0], bs[1], 0),
+                         tf.transformations.quaternion_from_euler(0, 0, bs[2]),
+                         rospy.Time.now(),
+                         '/base_footprint',
+                         '/map')
 
 
 import sys
