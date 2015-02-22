@@ -159,6 +159,8 @@ class Score:
 
     def get_start_keyframe(self, key, index):
         i = index
+        if i >= len(self.movements):
+            i = len(self.movements)-1
         while i > 0:
             if key in self.movements[i]:
                 return i
@@ -178,12 +180,18 @@ class Score:
         t2 = self.get_absolute_time(index) + time
         for key in keys:
             i0 = self.get_start_keyframe(key, index)
-            i1 = self.get_end_keyframe(key, index)
             start = self.movements[ i0 ][key]
+            
+            i1 = self.get_end_keyframe(key, index)
+            
+            if i1 >= len(self.movements):
+                state[key] = start
+                continue
+            
+
             end = self.movements[ i1 ][key]
             t0 = self.get_absolute_time(i0)
             t1 = self.get_absolute_time(i1)
-            print i0, i1, t0, t1
             pct = (t2 - t0) / (t1 - t0)
             d = []
             for a,b in zip(start, end):
