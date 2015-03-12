@@ -33,6 +33,8 @@ class ModeSwitcher:
             stop.append( self.controllers[key] ) 
             start.append( cname ) 
             self.controllers[key] = cname
+        if start==stop:
+            return
         self.switcher(start, stop, 1)
 
     def mannequin_mode(self):
