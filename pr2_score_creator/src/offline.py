@@ -35,14 +35,14 @@ class Offline:
             transition = self.score.movements[self.mi].get('transition', 'wait')
             if transition == 'service' and self.service_flag==False:
                 None
-            elif self.marker is not None:
+            elif self.marker is not None and self.mi < len(self.score.movements)-1:
                 ellapsed = rospy.Time.now() - self.marker
                 es = ellapsed.to_sec()
-                t = get_time(self.score.movements[self.mi])
+                t = get_time(self.score.movements[self.mi+1])
                 if es > t:
                     self.mi += 1
                     self.t = 0.0
-                    if self.mi >= len(self.score.movements):
+                    if self.mi >= len(self.score.movements)-1:
                         self.marker = None
                     elif self.score.movements[self.mi].get('transition', 'wait')=='service':
                         self.service_flag = False

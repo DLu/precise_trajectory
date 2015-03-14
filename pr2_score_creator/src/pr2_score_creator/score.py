@@ -153,7 +153,7 @@ class Score:
         
     def get_absolute_time(self, index):
         t = 0.0
-        for m in self.movements[:index]:
+        for m in self.movements[:index+1]:
             t += get_time(m)
         return t
 
