@@ -41,6 +41,8 @@ class Offline:
                 t = get_time(self.score.movements[self.mi+1])
                 if es > t:
                     self.mi += 1
+                    if 'label' in self.score.movements[self.mi]:
+                        print self.score.movements[self.mi]['label']
                     self.t = 0.0
                     if self.mi >= len(self.score.movements)-1:
                         self.marker = None
