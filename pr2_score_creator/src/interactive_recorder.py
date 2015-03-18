@@ -15,16 +15,29 @@ BUTTON_LAG = 1.0
 ALL = 'all'
 
 class InteractiveRecorder:
-    def __init__(self, keys, filename, directory=None, impact=False, interface=False):
+    def __init__(self, keys, filename, directory=None, impact=False, interface=False, start_label=None):
         rospy.init_node('interactive_recorder')
         self.time = None
         self.keys = [ALL] + keys
         self.key_i = 0
         self.change_mode(0)
-        self.mi = 0
         self.busy = False
         
         self.score = Score(filename, directory)
+        if start_label is None:
+            self.mi = 0
+        else:
+            indexes = self.score.find_label(start_label)
+            if len(indexes)==1:
+                self.mi = indexes[0]
+                rospy.loginfo('Starting at %s (i=%d)'%(start_label, self.mi))
+            elif len(indexes)>1:
+                rospy.logerr("Label %s is multiply defined"%start_label)
+                exit(0)
+            else:
+                rospy.logerr("Label %s is not defined"%start_label)
+                exit(0)
+        
         self.mode_switcher = ModeSwitcher(keys)
         self.controller = FullPr2Controller(keys=keys, impact=impact)
         if interface:
@@ -187,12 +200,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Interactive Motion Recorder')
     parser.add_argument('filename')
     parser.add_argument('directory', nargs='?')
+    parser.add_argument('-x', dest='start_label', nargs='?')
     parser.add_argument('-l', dest='keys', action='append_const', const=LEFT)
     parser.add_argument('-r', dest='keys', action='append_const', const=RIGHT)
     parser.add_argument('-b', dest='keys', action='append_const', const=BASE)
     parser.add_argument('-p', '--head', dest='keys', action='append_const', const=HEAD)
     parser.add_argument('-lh', dest='keys', action='append_const', const=LEFT_HAND)
     parser.add_argument('-rh', dest='keys', action='append_const', const=RIGHT_HAND)
+    parser.add_argument('-w', dest='keys', action='append_const', const=WHEELCHAIR)
     parser.add_argument('-s', '--audio', dest='keys', action='append_const', const=AUDIO)
     parser.add_argument('-a', '--all', action='store_true', dest='all')
     parser.add_argument('-i', '--impact', action='store_true', dest='impact')
@@ -205,7 +220,6 @@ if __name__ == '__main__':
     if args.keys is None or len(args.keys)==0:
         print "Must specify at least one part"
         exit(1)
-
-    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact, args.gui)
+    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact, args.gui, start_label=args.start_label)
     ir.spin()
 

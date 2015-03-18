@@ -128,6 +128,14 @@ class Score:
     def num_keyframes(self):
         return len(self.movements)
 
+    def find_label(self, key):
+        indexes = []
+        for i, mv in enumerate(self.movements):
+            label = mv.get('label', '')
+            if label == key:
+                indexes.append(i)
+        return indexes
+
     def to_file(self):
         print yaml.dump(self.movements)
         print
