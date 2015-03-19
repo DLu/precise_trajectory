@@ -2,6 +2,7 @@ from pr2_precise_trajectory import *
 from pr2_precise_trajectory.converter import save_trajectory, load_trajectory
 import os.path
 import yaml
+import rospy
 
 class Score:
     def __init__(self, filename, filedir=None):
