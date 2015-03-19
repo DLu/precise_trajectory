@@ -15,13 +15,14 @@ BUTTON_LAG = 1.0
 ALL = 'all'
 
 class InteractiveRecorder:
-    def __init__(self, keys, filename, directory=None, impact=False, interface=False, start_label=None):
+    def __init__(self, keys, filename, directory=None, impact=False, interface=False, start_label=None, mux=False):
         rospy.init_node('interactive_recorder')
         self.time = None
         self.keys = [ALL] + keys
         self.key_i = 0
         self.change_mode(0)
         self.busy = False
+        self.mux = mux
         
         self.score = Score(filename, directory)
         if start_label is None:
@@ -39,7 +40,7 @@ class InteractiveRecorder:
                 exit(0)
         
         self.mode_switcher = ModeSwitcher(keys)
-        self.controller = FullPr2Controller(keys=keys, impact=impact)
+        self.controller = FullPr2Controller(keys=keys, impact=impact. mux_it = self.mux)
         if interface:
             self.interface = Interface(self.score, self.controller.joint_watcher)
         else:
@@ -59,10 +60,13 @@ class InteractiveRecorder:
         self.joy[ PS3('select') ] = self.proxy #self.play # play from here
         self.joy[ PS3('start') ] = lambda: self.play(0) # play from start
         self.joy[ PS3('ps3') ] = self.score.to_file
-        self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
         self.joy[ PS3('r2') ] = lambda: self.change_time(1.5)
-        self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
         self.joy[ PS3('l2') ] = lambda: self.change_time(.5)
+
+        if not self.mux:
+            self.joy[ PS3('l1') ] = lambda: self.change_time(.9)
+            self.joy[ PS3('r1') ] = lambda: self.change_time(1.1) 
+        
         self.joy[ PS3('left_joy') ] = self.toggle_teleop
 
         if self.score.has_data():
@@ -212,6 +216,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--all', action='store_true', dest='all')
     parser.add_argument('-i', '--impact', action='store_true', dest='impact')
     parser.add_argument('-g', '--gui', action='store_true', dest='gui')
+    parser.add_argument('-m', '--mux', action='store_true', dest='mux')
 
     args = parser.parse_args()
     if args.all:
@@ -220,6 +225,6 @@ if __name__ == '__main__':
     if args.keys is None or len(args.keys)==0:
         print "Must specify at least one part"
         exit(1)
-    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact, args.gui, start_label=args.start_label)
+    ir = InteractiveRecorder(args.keys, args.filename, args.directory, args.impact, args.gui, start_label=args.start_label, mux=args.mux)
     ir.spin()
 
