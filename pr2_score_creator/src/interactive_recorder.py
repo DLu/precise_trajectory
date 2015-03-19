@@ -40,7 +40,7 @@ class InteractiveRecorder:
                 exit(0)
         
         self.mode_switcher = ModeSwitcher(keys)
-        self.controller = FullPr2Controller(keys=keys, impact=impact. mux_it = self.mux)
+        self.controller = FullPr2Controller(keys=keys, impact=impact, mux_it=self.mux)
         if interface:
             self.interface = Interface(self.score, self.controller.joint_watcher)
         else:
