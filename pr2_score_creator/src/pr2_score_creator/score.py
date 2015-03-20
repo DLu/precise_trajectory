@@ -1,8 +1,9 @@
 from pr2_precise_trajectory import *
 from pr2_precise_trajectory.converter import save_trajectory, load_trajectory
 import os.path
-import yaml
 import collections
+import yaml
+import rospy
 
 class Score:
     def __init__(self, filename, filedir=None):
@@ -102,11 +103,14 @@ class Score:
     def has_data(self):
         return self.is_valid_index()
 
-    def get_keyframe(self, index):
+    def get_keyframe(self, index, backwards=False):
         if not self.is_valid_index(index):
             return {}
 
-        m = self.movements[index]
+        m = {}
+        m.update(self.movements[index])
+        if backwards and index + 1< len(self.movements):
+            m[TIME] = get_time(self.movements[index+1])
         # TODO: Check if need the specific subset
         #m2 = {}
         #for key in self.keys[1:]:
@@ -125,6 +129,14 @@ class Score:
 
     def num_keyframes(self):
         return len(self.movements)
+
+    def find_label(self, key):
+        indexes = []
+        for i, mv in enumerate(self.movements):
+            label = mv.get('label', '')
+            if label == key:
+                indexes.append(i)
+        return indexes
 
     def to_file(self):
         print yaml.dump(self.movements)

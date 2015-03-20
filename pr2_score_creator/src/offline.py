@@ -11,7 +11,7 @@ import tf
 JNAMES = {'h': HEAD_JOINTS, 'l': get_arm_joint_names('l'), 'r': get_arm_joint_names('r')}
 
 class Offline:
-    def __init__(self, filename, directory=None):
+    def __init__(self, filename, directory=None, start_label=None):
         rospy.init_node('offline')
         self.pub = rospy.Publisher('/source_joints', JointState)
         self.service = rospy.Service('/proceed', Empty, self.service_call)
@@ -19,7 +19,19 @@ class Offline:
         self.tf = tf.TransformBroadcaster()
         self.score = Score(filename, directory)
         
-        self.mi = 0
+        if start_label is None:
+            self.mi = 0
+        else:
+            indexes = self.score.find_label(start_label)
+            if len(indexes)==1:
+                self.mi = indexes[0]
+                rospy.loginfo('Starting at %s (i=%d)'%(start_label, self.mi))
+            elif len(indexes)>1:
+                rospy.logerr("Label %s is multiply defined"%start_label)
+                exit(0)
+            else:
+                rospy.logerr("Label %s is not defined"%start_label)
+                exit(0)
         self.t = 0
         self.marker = None
         
@@ -77,6 +89,10 @@ class Offline:
             self.pub.publish(js)        
             r.sleep()    
 
-import sys
-o = Offline(sys.argv[1])
+args = rospy.myargv()
+print args
+if len(args)>2:
+    o = Offline(args[1], start_label=args[2])
+else:    
+    o = Offline(args[1])
 o.spin()
