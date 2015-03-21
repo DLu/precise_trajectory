@@ -90,7 +90,6 @@ class Offline:
             r.sleep()    
 
 args = rospy.myargv()
-print args
 if len(args)>2:
     o = Offline(args[1], start_label=args[2])
 else:    
