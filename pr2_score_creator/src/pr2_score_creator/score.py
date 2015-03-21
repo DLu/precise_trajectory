@@ -192,6 +192,8 @@ class Score:
         t2 = self.get_absolute_time(index) + time
         for key in keys:
             i0 = self.get_start_keyframe(key, index)
+            if key not in self.movements[i0]:
+                continue
             start = self.movements[ i0 ][key]
             
             i1 = self.get_end_keyframe(key, index)
@@ -207,6 +209,8 @@ class Score:
             pct = (t2 - t0) / (t1 - t0)
             d = []
             for a,b in zip(start, end):
+                if type(a)==str:
+                    continue
                 d.append( a + (b-a)*pct )
             state[key] = d
         return dict(state)
